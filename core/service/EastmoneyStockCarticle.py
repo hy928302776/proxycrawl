@@ -9,10 +9,11 @@ import urllib.parse
 
 import requests
 
-from ..config.common_config import crowBaseUrl
-from ..storage.MySqlStore import batchStockInfo
-from ..utils.urlToData import get_text
-from ..storage import MongoDbStore, MilvusStore
+sys.path.append("..")
+from config.common_config import crowBaseUrl
+from storage.MySqlStore import batchStockInfo
+from utils.urlToData import get_text
+from storage import MongoDbStore, MilvusStore
 
 htmlcontent = {
     "eastmoney-stock-carticle": {
@@ -29,7 +30,7 @@ htmlcontent = {
 
 
 def eastmoney(code: str, stockName: str, beginTime: str, endTime: str):  # 两个参数分别表示开始读取与结束读取的页码
-    domain="eastmoney-stock-carticle"
+    domain = "eastmoney-stock-carticle"
     param_content = htmlcontent[domain]
     if not param_content:
         print(f"该域名数据无法获取，domain:{domain}")
@@ -42,8 +43,8 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str):  # 两�
     count = 0
     flag = True
     errorList: list = []
-    beginTime = datetime.datetime.now().date().strftime("%Y-%m-%d") if not beginTime else beginTime
-    endTime = datetime.datetime.now().date().strftime("%Y-%m-%d") if not endTime else endTime
+    beginTime = (datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d") if not beginTime else beginTime
+    endTime = (datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d") if not endTime else endTime
     while flag and count < 5:
         print(f"开始获取第{pageIndex}页数据")
         domainurl: str = param_content['domainurl']
@@ -172,6 +173,6 @@ if __name__ == "__main__":
     if stockList and len(stockList) > 0:
         num = 0
         for stock in stockList:
-            num+=1
+            num += 1
             print(f"一共获取到了{len(stockList)}支股票，现在处理第{num}个：{stock}")
             eastmoney(stock['stock_code'], stock['securities_name'], beginTime, endTime)

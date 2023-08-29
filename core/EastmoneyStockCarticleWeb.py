@@ -1,6 +1,6 @@
 import sys
 
-from core.storage.MySqlStore import batchStockInfo
+from storage.MySqlStore import batchStockInfo
 from service.EastmoneyStockCarticle import eastmoney
 
 if __name__ == "__main__":
