@@ -145,7 +145,7 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str):  # 两�
 
         # 异常数据处理
     if len(errorList) > 0:
-        MongoDbStore.storeData(errorList, f"aifin_stock_error", milvusFlag)
+        MongoDbStore.storeData(errorList, f"aifin_stock_error", False)
 
         # 日志入库
     content = f"{stockName}-{code}完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据,异常数据{len(errorList)}条"
