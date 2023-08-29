@@ -69,14 +69,12 @@ def get_text(url):
         print(f"解析网页内容异常:{e}")
 
 
-def download_page(url: str, para=None):
+def download_page(url: str):
     if not url or len(url.strip()) == 0:
         return ""
 
-    if para:
-        response = requests.get(url, params=para)
-    else:
-        response = requests.get(url)
+    response = requests.get(url)
+    print(f"response:{response}")
     if response.status_code == 200:
         # 以下为乱码异常处理
         try:
@@ -93,9 +91,9 @@ def download_page(url: str, para=None):
                     text = response.text
         return text
     else:
-        print("failed to download the page")
+        print("failed to download the page:")
 
 
 if __name__ == '__main__':
-    text = get_text("http://caifuhao.eastmoney.com/news/20230829102110750010580")
+    text = get_text("http://caifuhao.eastmoney.com/news/20230829201224487514490")
     print(text)
