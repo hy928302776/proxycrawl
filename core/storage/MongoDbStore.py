@@ -1,7 +1,13 @@
-def storeData(docList: list, collection_name: str = 'aifin_stock', milvusFlag: bool = True, err: str = None):
+def storeData(docList: list, collection_name: str = 'aifin_stock', status: int = 1):
+    """
+    :param docList:
+    :param collection_name:
+    :param status: 0:无意义（默认），1:入矢量库，2:未入矢量库，3:异常
+    :return:
+    """
     import pymongo
     for doc in docList:
-        doc.update({'milvusFlag': milvusFlag, "err": err})
+        doc.update({'status': status})
 
     count = 0
     obj = None

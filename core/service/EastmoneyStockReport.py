@@ -7,6 +7,7 @@ import time
 import urllib.parse
 
 import requests
+
 sys.path.append("..")
 from config.common_config import crowBaseUrl
 from storage import MilvusStore
@@ -15,7 +16,7 @@ from storage import MongoDbStore
 from utils.urlToData import get_text
 
 
-def eastmoney(code: str, stockName: str, beginTime: str, endTime: str,bStore:bool=True):  # 两个参数分别表示开始读取与结束读取的页码
+def eastmoney(code: str, stockName: str, beginTime: str, endTime: str, bStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
 
     # 遍历每一个URL
     total = 0
@@ -23,8 +24,9 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str,bStore:boo
     pageSize = 10
     count = 0
     errorList: list = []
-    #Yesterday = datetime.date.today() - datetime.timedelta(days=1)
-    beginTime = (datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d") if not beginTime else beginTime
+    # Yesterday = datetime.date.today() - datetime.timedelta(days=1)
+    beginTime = (datetime.date.today() - datetime.timedelta(days=1)).strftime(
+        "%Y-%m-%d") if not beginTime else beginTime
     endTime = (datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d") if not endTime else endTime
     while count < 5:
         print(f"开始获取第{pageIndex}页数据")
@@ -79,21 +81,22 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str,bStore:boo
             if text:
                 storageList.append(metadata)
             else:
-                errorList.append(metadata)
+                errdata = {"err": err}
+                errorList.append(errdata.update(metadata))
 
             print(f"第{total}条数据处理完成,数据内容：{json.dumps(metadata, ensure_ascii=False)}")
             print("\n")
 
         if bStore and len(storageList) > 0:
             # 存入矢量库
-            milvusFlag = True
+            status = 1
             try:
                 MilvusStore.storeData(storageList, f"aifin_stock_{code}")
             except:
                 print(f"第{pageIndex}页的数据，大小为{len(data)} 存入矢量库异常")
-                milvusFlag = False
+                status = 2
             # 存入mongoDB库
-            MongoDbStore.storeData(storageList, f"aifin_stock", milvusFlag,err)
+            MongoDbStore.storeData(storageList, f"aifin_stock", status)
 
         print(f"第{pageIndex}页数据处理完成")
         print("\n")
@@ -102,7 +105,7 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str,bStore:boo
 
     # 异常数据处理
     if bStore and len(errorList) > 0:
-        MongoDbStore.storeData(errorList, f"aifin_stock_error", False,err)
+        MongoDbStore.storeData(errorList, f"aifin_stock_error", 3)
 
     # 日志入库
     content = f"{stockName}-{code}完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据,异常数据{len(errorList)}条"
@@ -111,7 +114,7 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str,bStore:boo
                 "name": stockName,
                 "createTime": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                 "content": content}]
-    MongoDbStore.storeData(logdata, f"aifin_logs", False)
+    MongoDbStore.storeData(logdata, f"aifin_logs", 0)
     print(content)
 
 
@@ -120,17 +123,17 @@ if __name__ == "__main__":
     offset = sys.argv[2]  # 偏移量
     beginTime = None
     endTime = None
-    if len(sys.argv)>3:
-    	beginTime = sys.argv[3]  # 开始时间
-    	endTime = sys.argv[4]  # 结束时间"2023-08-28"
+    if len(sys.argv) > 3:
+        beginTime = sys.argv[3]  # 开始时间
+        endTime = sys.argv[4]  # 结束时间"2023-08-28"
     # startPage = sys.argv[4]  # 从第几页
     # print(f"参数列表，domain:{domain},code:{code},type:{type},startPage:{startPage}")
     # eastmoney(code, type, int(startPage))
     print(f"参数列表，start:{start}，offset：{offset},beginTime:{beginTime},endTime:{endTime}")
-    stockList: list = batchStockInfo(1000, int(start),int(offset))
+    stockList: list = batchStockInfo(1000, int(start), int(offset))
     if stockList and len(stockList) > 0:
         num = 0
         for stock in stockList:
-            num+=1
+            num += 1
             print(f"一共获取到了{len(stockList)}支股票，现在处理第{num}个：{stock}")
             eastmoney(stock['stock_code'], stock['securities_name'], beginTime, endTime)

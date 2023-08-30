@@ -119,6 +119,6 @@ def download_page(url: str):
 
 
 if __name__ == '__main__':
-    text, err = get_text("http://caifuhao.eastmoney.com/news/20230829164951937863720")
+    text, err = get_text("http://blog.eastmoney.com/bob008/blog_1346536362.html")
     print(text)
     print(err)

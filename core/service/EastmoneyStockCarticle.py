@@ -43,7 +43,8 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str):  # 两�
     count = 0
     flag = True
     errorList: list = []
-    beginTime = (datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d") if not beginTime else beginTime
+    beginTime = (datetime.date.today() - datetime.timedelta(days=1)).strftime(
+        "%Y-%m-%d") if not beginTime else beginTime
     endTime = (datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d") if not endTime else endTime
     while flag and count < 5:
         print(f"开始获取第{pageIndex}页数据")
@@ -100,7 +101,7 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str):  # 两�
 
             print(f"开始处理第{total}条数据：{data[i]}")
             url = data[i]['url']
-            text = get_text(url)
+            text, err = get_text(url)
             abstract = data[i]['content'].replace('</em>', '').replace('<em>', '').strip()
             if not abstract or len(abstract) == 0:
                 if text and len(text) > 0:
@@ -122,21 +123,22 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str):  # 两�
             if text:
                 storageList.append(metadata)
             else:
-                errorList.append(metadata)
+                errdata = {"err": err}
+                errorList.append(errdata.update(metadata))
 
             print(f"第{total}条数据处理完成,数据内容：{json.dumps(metadata, ensure_ascii=False)}")
             print("\n")
 
         if len(storageList) > 0:
             # 存入矢量库
-            milvusFlag = True
+            status = 1
             try:
                 MilvusStore.storeData(storageList, f"aifin_stock_{code}")
             except:
                 print(f"第{pageIndex}页的数据，大小为{len(data)} 存入矢量库异常")
-                milvusFlag = False
+                status = 2
             # 存入mongoDB库
-            MongoDbStore.storeData(storageList, f"aifin_stock", milvusFlag)
+            MongoDbStore.storeData(storageList, f"aifin_stock", status)
 
         print(f"第{pageIndex}页数据处理完成")
         print("\n")
@@ -145,7 +147,7 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str):  # 两�
 
         # 异常数据处理
     if len(errorList) > 0:
-        MongoDbStore.storeData(errorList, f"aifin_stock_error", False)
+        MongoDbStore.storeData(errorList, f"aifin_stock_error", 3)
 
         # 日志入库
     content = f"{stockName}-{code}完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据,异常数据{len(errorList)}条"
@@ -154,7 +156,7 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str):  # 两�
                 "name": stockName,
                 "createTime": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                 "content": content}]
-    MongoDbStore.storeData(logdata, f"aifin_logs", False)
+    MongoDbStore.storeData(logdata, f"aifin_logs", 0)
     print(content)
 
 
