@@ -1,8 +1,15 @@
+import datetime
+import json
+import sys
+import time
+import urllib
 from typing import Dict
 
 import chardet
 import requests
 from bs4 import BeautifulSoup
+sys.path.append("..")
+from config.common_config import crowBaseUrl
 
 analysis_method = [
     {"domain": "http://caifuhao.eastmoney.com/news/",
@@ -48,11 +55,12 @@ def get_analysis_method(url: str) -> Dict:
 
 
 def get_text(url):
+
+    text = None
     try:
         item = get_analysis_method(url)
         if item:
             soup = BeautifulSoup(download_page(url))
-            text = None
             # 获取内容
             if "value" in item:
                 all_comments = soup.find_all(item['value']['element'], item['value']['attr'])
@@ -64,17 +72,26 @@ def get_text(url):
             if text and "replace" in item:
                 for t in item['replace']:
                     text = text.replace(t, "")
-            return text
+            return text, None
+        else:
+            errlog = f"该url【{url}】没有配置内容解析方式"
+            print(errlog)
+            return text, errlog
+
     except Exception as e:
         print(f"解析网页内容异常:{e}")
+        return text, f"解析网页内容异常:{e}"
 
 
 def download_page(url: str):
     if not url or len(url.strip()) == 0:
         return ""
-
-    response = requests.get(url)
-    print(f"response:{response}")
+    print(f"url:{url}")
+    crawUrl = f"{crowBaseUrl}&url={urllib.parse.quote(url)}"
+    print(f"crawUrl:{crawUrl}")
+    starttime = int(time.time() * 1000)
+    response = requests.get(crawUrl)
+    print(f"response:{response}，耗时：{int(time.time() * 1000)-starttime}")
     if response.status_code == 200:
         # 以下为乱码异常处理
         try:
@@ -91,9 +108,17 @@ def download_page(url: str):
                     text = response.text
         return text
     else:
-        print("failed to download the page:")
+        print("failed to download the page")
+        try:
+            if response:
+                print(json.dumps(response))
+            else:
+                print("response is None")
+        except:
+            print("解析response异常")
 
 
 if __name__ == '__main__':
-    text = get_text("http://caifuhao.eastmoney.com/news/20230829201224487514490")
+    text, err = get_text("http://caifuhao.eastmoney.com/news/20230829164951937863720")
     print(text)
+    print(err)

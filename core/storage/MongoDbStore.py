@@ -1,11 +1,7 @@
-
-
-
-def storeData(docList:list,collection_name:str='aifin_stock',milvusFlag:bool=True):
-
+def storeData(docList: list, collection_name: str = 'aifin_stock', milvusFlag: bool = True, err: str = None):
     import pymongo
     for doc in docList:
-        doc.update({'milvusFlag': milvusFlag})
+        doc.update({'milvusFlag': milvusFlag, "err": err})
 
     count = 0
     obj = None
@@ -23,20 +19,18 @@ def storeData(docList:list,collection_name:str='aifin_stock',milvusFlag:bool=Tru
         raise Exception(f"写入mongodb库异常{count}次")
     print(f"写入mongodb【{collection_name}】库over")
 
+
 if __name__ == '__main__':
     metadata = [{"source": "Web",
-                "uniqueId": 'A111',
-                "code": '123',
-                "name": 'stockName',
-                "url": 'url',
-                "date": '2023-09-09',
-                "type": "eastmoney-stock-report",
-                "createTime": '2022-09-08',
-                "abstract": 'abstract',
-                "title": '你好',
-                "mediaName": '中国',
-                "text": 'text'}]
+                 "uniqueId": 'A111',
+                 "code": '123',
+                 "name": 'stockName',
+                 "url": 'url',
+                 "date": '2023-09-09',
+                 "type": "eastmoney-stock-report",
+                 "createTime": '2022-09-08',
+                 "abstract": 'abstract',
+                 "title": '你好',
+                 "mediaName": '中国',
+                 "text": 'text'}]
     storeData(metadata)
-
-
-

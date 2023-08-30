@@ -57,7 +57,7 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str,bStore:boo
             print(f"开始处理第{total}条数据：{data[i]}")
             url = f"https://data.eastmoney.com/report/info/{data[i]['infoCode']}.html"
 
-            text = get_text(url)
+            text, err = get_text(url)
             if text:
                 abstract = ""
                 if text and len(text) > 0:
@@ -93,7 +93,7 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str,bStore:boo
                 print(f"第{pageIndex}页的数据，大小为{len(data)} 存入矢量库异常")
                 milvusFlag = False
             # 存入mongoDB库
-            MongoDbStore.storeData(storageList, f"aifin_stock", milvusFlag)
+            MongoDbStore.storeData(storageList, f"aifin_stock", milvusFlag,err)
 
         print(f"第{pageIndex}页数据处理完成")
         print("\n")
@@ -102,7 +102,7 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str,bStore:boo
 
     # 异常数据处理
     if bStore and len(errorList) > 0:
-        MongoDbStore.storeData(errorList, f"aifin_stock_error", False)
+        MongoDbStore.storeData(errorList, f"aifin_stock_error", False,err)
 
     # 日志入库
     content = f"{stockName}-{code}完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据,异常数据{len(errorList)}条"
