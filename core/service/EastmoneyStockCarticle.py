@@ -124,7 +124,8 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str):  # 两�
                 storageList.append(metadata)
             else:
                 errdata = {"err": err}
-                errorList.append(errdata.update(metadata))
+                errdata.update(metadata)
+                errorList.append(errdata)
 
             print(f"第{total}条数据处理完成,数据内容：{json.dumps(metadata, ensure_ascii=False)}")
             print("\n")
