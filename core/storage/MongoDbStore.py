@@ -1,3 +1,5 @@
+# -*- coding: UTF-8 -*-
+
 def storeData(docList: list, collection_name: str = 'aifin_stock', status: int = 1):
     """
     :param docList:

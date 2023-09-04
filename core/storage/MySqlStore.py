@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import json
 
 import pymysql
@@ -62,7 +63,7 @@ def batchStockInfo(start:int,offset:int)->list:
     获取所有的表数据
     """
 
-    sql = f"select securities_code,securities_name,stock_code from stock_info where is_deleted = 0 limit {start},{offset}"
+    sql = f"select securities_code,securities_name,stock_code from stock_info where is_deleted = 0 ORDER BY id limit {start},{offset}"
     db = DbConnect(dbinfo, database="milvus_data")
     result = db.select(sql)
     db.close()
