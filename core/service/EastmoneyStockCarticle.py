@@ -134,7 +134,7 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str):  # 两�
             # 存入矢量库
             status = 1
             try:
-                print(f"矢量库信息：{json.dumps(storageList)}")
+                #print(f"矢量库信息：{json.dumps(storageList,ensure_ascii=False)}")
                 MilvusStore.storeData(storageList, f"aifin_stock_{code}")
             except Exception as e:
                 print(f"第{pageIndex}页的数据，大小为{len(data)} 存入矢量库异常,{e}")
