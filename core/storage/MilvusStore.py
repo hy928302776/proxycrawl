@@ -13,7 +13,8 @@ embedding_model_dict = {
     "ernie-base": "nghuyong/ernie-3.0-base-zh",
     "text2vec-base": "shibing624/text2vec-base-chinese",
     "text2vec": "/root/model/text2vec-large-chinese",
-    "m3e-small": "/data/huggingface/moka-ai/m3e-base",
+    #"m3e-small": "/data/huggingface/moka-ai/m3e-base",
+    "m3e-small": "/root/.crawlab/huggingface/moka-ai/m3e-base",
     "m3e-base": "moka-ai/m3e-base",
 }
 EMBEDDING_MODEL = "m3e-small"
