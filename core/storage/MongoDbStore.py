@@ -28,6 +28,16 @@ def storeData(docList: list, collection_name: str = 'aifin_stock', status: int =
     print(f"写入mongodb【{collection_name}】库over")
 
 
+def searchData(collection_name: str = 'aifin_stock'):
+    """
+    :param docList:
+    :param collection_name:
+    :param status: 0:无意义（默认），1:入矢量库，2:未入矢量库，3:异常
+    :return:
+    """
+    pass
+
+
 if __name__ == '__main__':
     metadata = [{"source": "Web",
                  "uniqueId": 'A111',

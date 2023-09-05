@@ -132,15 +132,15 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str):  # 两�
 
         if len(storageList) > 0:
             # 存入矢量库
-            status = 1
-            try:
-                #print(f"矢量库信息：{json.dumps(storageList,ensure_ascii=False)}")
-                MilvusStore.storeData(storageList, f"aifin_stock_{code}")
-            except Exception as e:
-                print(f"第{pageIndex}页的数据，大小为{len(data)} 存入矢量库异常,{e}")
-                status = 2
+            #status = 0
+            # try:
+            #     #print(f"矢量库信息：{json.dumps(storageList,ensure_ascii=False)}")
+            #     MilvusStore.storeData(storageList, f"aifin_stock_{code}")
+            # except Exception as e:
+            #     print(f"第{pageIndex}页的数据，大小为{len(data)} 存入矢量库异常,{e}")
+            #     status = 2
             # 存入mongoDB库
-            MongoDbStore.storeData(storageList, f"aifin_stock", status)
+            MongoDbStore.storeData(storageList, f"aifin_stock", 0)
 
         print(f"第{pageIndex}页数据处理完成")
         print("\n")
@@ -149,7 +149,7 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str):  # 两�
 
         # 异常数据处理
     if len(errorList) > 0:
-        MongoDbStore.storeData(errorList, f"aifin_stock_error", 3)
+        MongoDbStore.storeData(errorList, f"aifin_stock_error", 0)
 
         # 日志入库
     content = f"{stockName}-{code}完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据,异常数据{len(errorList)}条"
