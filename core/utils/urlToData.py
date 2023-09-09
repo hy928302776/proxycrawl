@@ -80,6 +80,15 @@ analysis_method = [
      "replace": ["\n\n", "  "],
      "temp": "http://www.stats.gov.cn/sj/zxfb/202309/t20230909_1942695.html"
      },
+    {"domain": "http://www.stats.gov.cn/sj/sjjd/",
+     "value": {
+         "element": "div",
+         "attr": {"class": "txt-content"},
+     },
+     "extract": ["table"],
+     "replace": ["\n\n", "  "],
+     "temp": "http://www.stats.gov.cn/sj/sjjd/202309/t20230909_1942694.html"
+     },
 ]
 
 

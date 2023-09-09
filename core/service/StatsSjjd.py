@@ -2,7 +2,7 @@ import sys
 import uuid
 
 
-# ============  国家统计局-最新发布===========
+# ============  国家统计局-数据解读===========
 sys.path.append("..")
 import datetime
 import json
@@ -11,10 +11,10 @@ from utils.urlToData import download_page, get_text
 from storage import MilvusStore
 from storage import MongoDbStore
 
-def stats_zxfb(beginTime: str, endTime: str, bStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
+def stats_sjjd(beginTime: str, endTime: str, bStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
 
     # 遍历每一个URL
-    type = "stats_zxfb"  # 此次查询类型
+    type = "stats_sjjd"  # 此次查询类型
     total = 0  # 统计总数量
     pageIndex = 1  # 起始业
     err_count = 0  # 统计异常次数
@@ -31,7 +31,7 @@ def stats_zxfb(beginTime: str, endTime: str, bStore: bool = True):  # 两个参�
         suffix = ""
         if pageIndex > 1:
             suffix = f"_{pageIndex - 1}"
-        link = f"http://www.stats.gov.cn/sj/zxfb/index{suffix}.html"
+        link = f"http://www.stats.gov.cn/sj/sjjd/index{suffix}.html"
         print(f"请求路径:{link}")
 
         # （2）请求列表数据
@@ -72,7 +72,7 @@ def stats_zxfb(beginTime: str, endTime: str, bStore: bool = True):  # 两个参�
             url = element_data.find_next('a')['href']
             if not url:
                 continue
-            url = f"http://www.stats.gov.cn/sj/zxfb{url[1:]}"
+            url = f"http://www.stats.gov.cn/sj/sjjd{url[1:]}"
             title = element_data.find_next('a')['title']
 
             text, err = get_text(url)
@@ -133,4 +133,4 @@ def stats_zxfb(beginTime: str, endTime: str, bStore: bool = True):  # 两个参�
 
 
 if __name__ == "__main__":
-    stats_zxfb('2023-06-09', '2023-09-09', False)
+    stats_sjjd('2023-09-09', '2023-09-09', False)
