@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-
+import pymongo
 def storeData(docList: list, collection_name: str = 'aifin_stock', status: int = 1):
     """
     :param docList:
@@ -7,7 +7,7 @@ def storeData(docList: list, collection_name: str = 'aifin_stock', status: int =
     :param status: 0:无意义（默认），1:入矢量库，2:未入矢量库，3:异常
     :return:
     """
-    import pymongo
+
     for doc in docList:
         doc.update({'status': status})
 
@@ -35,7 +35,11 @@ def searchData(collection_name: str = 'aifin_stock'):
     :param status: 0:无意义（默认），1:入矢量库，2:未入矢量库，3:异常
     :return:
     """
-    pass
+    conn = pymongo.MongoClient('mongodb://root:QAZwsx123@36.138.93.247:31966')
+    database = conn['milvus_data']
+    collection = database[collection_name]
+    collection.find({})
+	#db.test.find({xxx...xxx}).sort({"amount":1}).skip(10).limit(10)/
 
 
 if __name__ == '__main__':

@@ -8,6 +8,7 @@ from typing import Dict
 import chardet
 import requests
 from bs4 import BeautifulSoup
+
 sys.path.append("..")
 from config.common_config import crowBaseUrl
 
@@ -45,6 +46,38 @@ analysis_method = [
      "replace": ["\n\n", "  "],
      "temp": "https://data.eastmoney.com/report/zw_industry.jshtml?infocode=AN122334534556"
      },
+    {"domain": "http://finance.eastmoney.com/a/",
+     "value": {
+         "element": "div",
+         "attr": {"class": "txtinfos"},
+     },
+     "replace": ["\n\n", "  ", "<em>", "</em>"],
+     "temp": "http://finance.eastmoney.com/a/202309052838047556.html"
+     },
+    {"domain": "https://finance.eastmoney.com/a/",
+     "value": {
+         "element": "div",
+         "attr": {"class": "txtinfos"},
+     },
+     "replace": ["\n\n", "  "],
+     "temp": "https://finance.eastmoney.com/a/202309052838047556.html"
+     },
+    {"domain": "http://www.pbc.gov.cn/goutongjiaoliu/113456/113469/index.html",
+     "value": {
+         "element": "div",
+         "attr": {"class": "txtinfos"},
+     },
+     "replace": ["\n\n", "  "],
+     "temp": "http://www.pbc.gov.cn/goutongjiaoliu/113456/113469/index.html"
+     },
+    {"domain": "http://www.stats.gov.cn/sj/zxfb/",
+     "value": {
+         "element": "div",
+         "attr": {"class": "txt-content"},
+     },
+     "replace": ["\n\n", "  "],
+     "temp": "http://www.stats.gov.cn/sj/zxfb/202309/t20230909_1942695.html"
+     },
 ]
 
 
@@ -55,7 +88,6 @@ def get_analysis_method(url: str) -> Dict:
 
 
 def get_text(url):
-
     text = None
     try:
         item = get_analysis_method(url)
@@ -90,8 +122,8 @@ def download_page(url: str):
     crawUrl = f"{crowBaseUrl}&url={urllib.parse.quote(url)}"
     print(f"crawUrl:{crawUrl}")
     starttime = int(time.time() * 1000)
-    response = requests.get(crawUrl)
-    print(f"response:{response}，耗时：{int(time.time() * 1000)-starttime}")
+    response = requests.get(url)
+    print(f"response:{response}，耗时：{int(time.time() * 1000) - starttime}")
     if response.status_code == 200:
         # 以下为乱码异常处理
         try:
@@ -119,6 +151,6 @@ def download_page(url: str):
 
 
 if __name__ == '__main__':
-    text, err = get_text("http://blog.eastmoney.com/bob008/blog_1346536362.html")
+    text, err = get_text("http://www.pbc.gov.cn/goutongjiaoliu/113456/113469/index.html")
     print(text)
     print(err)

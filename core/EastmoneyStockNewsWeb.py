@@ -1,7 +1,7 @@
 import sys
 
 from storage.MySqlStore import batchStockInfo
-from service.EastmoneyStockCarticle import eastmoney
+from service.EastmoneyStockNews import eastmoney
 
 if __name__ == "__main__":
     start = sys.argv[1]  # 起始
