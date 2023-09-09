@@ -1,45 +1,65 @@
 # -*- coding: UTF-8 -*-
 import pymongo
-def storeData(docList: list, collection_name: str = 'aifin_stock', status: int = 1):
-    """
-    :param docList:
-    :param collection_name:
-    :param status: 0:无意义（默认），1:入矢量库，2:未入矢量库，3:异常
-    :return:
-    """
-
-    for doc in docList:
-        doc.update({'status': status})
-
-    count = 0
-    obj = None
-    while True and count < 3:
-        try:
-            conn = pymongo.MongoClient('mongodb://root:QAZwsx123@36.138.93.247:31966')
-            database = conn['milvus_data']
-            collection = database[collection_name]
-            obj = collection.insert_many(docList)
-            break
-        except Exception as e:
-            count += 1
-            print(f"error,写入mongodb库异常 {count}次,{e}")
-    if not obj:
-        raise Exception(f"写入mongodb库异常{count}次")
-    print(f"写入mongodb【{collection_name}】库over")
 
 
-def searchData(collection_name: str = 'aifin_stock'):
-    """
-    :param docList:
-    :param collection_name:
-    :param status: 0:无意义（默认），1:入矢量库，2:未入矢量库，3:异常
-    :return:
-    """
-    conn = pymongo.MongoClient('mongodb://root:QAZwsx123@36.138.93.247:31966')
-    database = conn['milvus_data']
-    collection = database[collection_name]
-    collection.find({})
-	#db.test.find({xxx...xxx}).sort({"amount":1}).skip(10).limit(10)/
+class MongoDbStore:
+    conn = None
+    collection = None
+    collection_name = None
+
+    def __init__(self, collection_name: str):
+        self.collection_name = collection_name
+        self.conn = pymongo.MongoClient('mongodb://root:QAZwsx123@36.138.93.247:31966')
+        database = self.conn['milvus_data']
+        self.collection = database[self.collection_name]
+
+    def storeData(self, docList: list, status: int = 0):
+        """
+        :param docList:
+        :param collection_name:
+        :param status:
+        :return:
+        """
+
+        for doc in docList:
+            doc.update({'status': status})
+
+        self.collection.insert_many(docList)
+        print(f"写入mongodb【{self.collection_name}】库over")
+        return self
+
+    def searchData(self, condation: dict = {}, size: int = 100):
+        """
+
+        :param condation: 条件
+        :param size: 大小
+        :return: 返回结果集
+        """
+        return self.collection.find(condation).limit(size)
+
+    # db.test.find({xxx...xxx}).sort({"amount":1}).skip(10).limit(10)/
+
+    def countData(self, condation: dict = {}):
+        # 定义查询条件
+        query = condation  # 替换为实际的查询条件
+
+        # 构建聚合管道
+        pipeline = [
+            {"$match": query},
+            {"$count": "total"}
+        ]
+        # 执行聚合查询
+        result = self.collection.aggregate(pipeline)
+        # 获取符合条件的文档总数
+        nextObj = result.try_next()
+        total_count = 0
+        if nextObj:
+            total_count = nextObj['total']
+        return total_count
+
+    def close(self):
+        # 关闭连接
+        self.conn.close()
 
 
 if __name__ == '__main__':
@@ -55,4 +75,4 @@ if __name__ == '__main__':
                  "title": '你好',
                  "mediaName": '中国',
                  "text": 'text'}]
-    storeData(metadata)
+    MongoDbStore("aifin_stock").storeData(metadata, 0).close()

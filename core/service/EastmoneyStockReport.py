@@ -12,7 +12,7 @@ sys.path.append("..")
 from config.common_config import crowBaseUrl
 from storage import MilvusStore
 from storage.MySqlStore import batchStockInfo
-from storage import MongoDbStore
+from storage.MongoDbStore import MongoDbStore
 from utils.urlToData import get_text
 
 
@@ -97,7 +97,7 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str, bStore: b
                 print(f"第{pageIndex}页的数据，大小为{len(data)} 存入矢量库异常")
                 status = 2
             # 存入mongoDB库
-            MongoDbStore.storeData(storageList, f"aifin_stock", status)
+            MongoDbStore("aifin_stock").storeData(storageList, status).close()
 
         print(f"第{pageIndex}页数据处理完成")
         print("\n")
@@ -106,7 +106,7 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str, bStore: b
 
     # 异常数据处理
     if bStore and len(errorList) > 0:
-        MongoDbStore.storeData(errorList, f"aifin_stock_error", 0)
+        MongoDbStore("aifin_stock_error").storeData(errorList, -1).close()
 
     # 日志入库
     content = f"{stockName}-{code}完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据,异常数据{len(errorList)}条"
@@ -115,7 +115,7 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str, bStore: b
                 "name": stockName,
                 "createTime": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                 "content": content}]
-    MongoDbStore.storeData(logdata, f"aifin_logs", 0)
+    MongoDbStore("aifin_logs").storeData(logdata, 0).close()
     print(content)
 
 

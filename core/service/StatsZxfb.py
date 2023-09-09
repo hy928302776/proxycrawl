@@ -2,6 +2,7 @@ import sys
 import uuid
 
 
+
 # ============  国家统计局-最新发布===========
 sys.path.append("..")
 import datetime
@@ -9,7 +10,8 @@ import json
 from bs4 import BeautifulSoup
 from utils.urlToData import download_page, get_text
 from storage import MilvusStore
-from storage import MongoDbStore
+from storage.MongoDbStore import MongoDbStore
+
 
 def stats_zxfb(beginTime: str, endTime: str, bStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
 
@@ -107,11 +109,11 @@ def stats_zxfb(beginTime: str, endTime: str, bStore: bool = True):  # 两个参�
             status = 0
             try:
                 MilvusStore.storeData(storageList, "aifin_macro")
-            except:
-                print(f"第{pageIndex}页的数据，大小为{len(list_data)} 存入矢量库异常")
+            except Exception as e:
+                print(f"第{pageIndex}页的数据，大小为{len(list_data)} 存入矢量库异常:{e}")
                 status = -1
             # 存入mongoDB库
-            MongoDbStore.storeData(storageList, f"aifin_macro", status)
+            MongoDbStore("aifin_macro").storeData(storageList, status).close()
 
         print(f"第{pageIndex}页数据处理完成")
         print("\n")
@@ -121,16 +123,16 @@ def stats_zxfb(beginTime: str, endTime: str, bStore: bool = True):  # 两个参�
     # 异常数据处理
     if bStore:
         if len(errorList) > 0:
-            MongoDbStore.storeData(errorList, f"aifin_stock_error", 3)
+            MongoDbStore("aifin_stock_error").storeData(errorList, -1).close()
 
         # 日志入库
         content = f"完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据,异常数据{len(errorList)}条"
         logdata = [{"type": type,
                     "createTime": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                     "content": content}]
-        MongoDbStore.storeData(logdata, f"aifin_logs", 0)
+        MongoDbStore("aifin_logs").storeData(logdata, 0).close()
         print(content)
 
 
 if __name__ == "__main__":
-    stats_zxfb('2023-06-09', '2023-09-09', False)
+    stats_zxfb('2023-09-09', '2023-09-09', True)

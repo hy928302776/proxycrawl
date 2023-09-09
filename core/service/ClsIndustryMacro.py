@@ -17,6 +17,9 @@ def eastmoney(industryCode: str,industryName:str, type: str):  # 两个参数分
     total = 0
     flag = True
     count = 0
+    pageIndex=1
+    pageSize=10
+    startPage=None
     endTime = datetime.date.today()
     beginTime = endTime
     if type == "2":
