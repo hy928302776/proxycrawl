@@ -1,6 +1,6 @@
 import sys
 
-from core.service.StatsZxfb import stats_zxfb
+from service.StatsZxfb import stats_zxfb
 
 if __name__ == '__main__':
     beginTime = sys.argv[1]  # 开始时间
