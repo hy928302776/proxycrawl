@@ -107,8 +107,8 @@ def stats_sjjd(beginTime: str, endTime: str, bStore: bool = True):  # 两个参�
             status = 0
             try:
                 MilvusStore.storeData(storageList, "aifin_macro")
-            except:
-                print(f"第{pageIndex}页的数据，大小为{len(list_data)} 存入矢量库异常")
+            except Exception as e:
+                print(f"第{pageIndex}页的数据，大小为{len(list_data)} 存入矢量库异常:{e}")
                 status = -1
             # 存入mongoDB库
             MongoDbStore.storeData(storageList, f"aifin_macro", status)
