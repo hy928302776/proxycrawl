@@ -1,5 +1,6 @@
 import datetime
 import json
+import re
 import sys
 import time
 import urllib
@@ -7,7 +8,7 @@ from typing import Dict
 
 import chardet
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment
 
 sys.path.append("..")
 from config.common_config import crowBaseUrl
@@ -75,6 +76,7 @@ analysis_method = [
          "element": "div",
          "attr": {"class": "txt-content"},
      },
+     "extract": ["table"],
      "replace": ["\n\n", "  "],
      "temp": "http://www.stats.gov.cn/sj/zxfb/202309/t20230909_1942695.html"
      },
@@ -93,17 +95,29 @@ def get_text(url):
         item = get_analysis_method(url)
         if item:
             soup = BeautifulSoup(download_page(url))
-            # 获取内容
+
+            # （1）过滤不想要的标签,如果有多个标签也可以逗号分割：
+            if "extract" in item:
+                [s.extract() for s in soup(item['extract'])]
+
+            # （2）去除注释
+            comments = soup.findAll(text=lambda text: isinstance(text, Comment))
+            [comment.extract() for comment in comments]
+
+            # （3）获取内容
             if "value" in item:
-                all_comments = soup.find_all(item['value']['element'], item['value']['attr'])
-                if all_comments and len(all_comments) > 0:
-                    text = all_comments[0].get_text()
+                elementLab = soup.find(item['value']['element'], item['value']['attr'])
+                text = elementLab.get_text()
             else:
                 text = soup.get_text()
-            # 替换
+
+            # （4）替换
             if text and "replace" in item:
                 for t in item['replace']:
                     text = text.replace(t, "")
+
+                # （5）删除两个换行符之间的任意数量的空白字符
+            text = re.sub(r'\n\s*\n', r'\n\n', text.strip(), flags=re.M)
             return text, None
         else:
             errlog = f"该url【{url}】没有配置内容解析方式"
@@ -151,6 +165,7 @@ def download_page(url: str):
 
 
 if __name__ == '__main__':
-    text, err = get_text("http://www.pbc.gov.cn/goutongjiaoliu/113456/113469/index.html")
-    print(text)
+    text, err = get_text("http://www.stats.gov.cn/sj/zxfb/202308/t20230831_1942429.html")
+    print()
+    # print(text)
     print(err)
