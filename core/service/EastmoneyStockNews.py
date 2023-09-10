@@ -9,7 +9,10 @@ import urllib.parse
 
 import requests
 
+
+
 sys.path.append("..")
+from config.common_config import crowBaseUrl
 from config.Logger import logger
 from utils.urlToData import get_text
 from storage import MilvusStore
@@ -63,9 +66,9 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str):  # 两�
             link = link + "&" + key + "=" + urllib.parse.quote(value)
 
         print(f"link:{link}")  # 用于检查
-        # crawUrl = f"{crowBaseUrl}&url={urllib.parse.quote(link)}"
+        crawUrl = f"{crowBaseUrl}&url={urllib.parse.quote(link)}"
         try:
-            response = requests.get(link, verify=False, timeout=30)  # 禁止重定向
+            response = requests.get(crawUrl, verify=False, timeout=30)  # 禁止重定向
             print(response.text)
         except Exception as e:
             count += 1

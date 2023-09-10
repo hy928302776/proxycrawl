@@ -1,6 +1,6 @@
 import sys
 
-from service.StatsSjjd import stats_sjjd
+from service.StatsSjjdMacro import stats_sjjd
 
 if __name__ == '__main__':
     beginTime = None

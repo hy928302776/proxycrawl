@@ -89,6 +89,14 @@ analysis_method = [
      "replace": ["\n\n", "  "],
      "temp": "http://www.stats.gov.cn/sj/sjjd/202309/t20230909_1942694.html"
      },
+    {"domain": "http://stock.eastmoney.com/a/",
+     "value": {
+         "element": "div",
+         "attr": {"class": "txtinfos"},
+     },
+     "replace": ["\n\n", "  "],
+     "temp": "http://stock.eastmoney.com/a/202309092842368482.html"
+     },
 ]
 
 
@@ -174,7 +182,7 @@ def download_page(url: str):
 
 
 if __name__ == '__main__':
-    text, err = get_text("http://www.stats.gov.cn/sj/zxfb/202308/t20230831_1942429.html")
+    text, err = get_text("http://stock.eastmoney.com/a/202309092842368482.html")
     print()
     # print(text)
     print(err)

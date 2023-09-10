@@ -1,6 +1,6 @@
 import sys
 
-from service.StatsZxfb import stats_zxfb
+from service.StatsZxfbMacro import stats_zxfb
 
 if __name__ == '__main__':
     beginTime = None
