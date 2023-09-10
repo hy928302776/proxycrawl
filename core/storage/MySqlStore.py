@@ -48,8 +48,8 @@ def allStockInfo()->list:
     """
     获取所有的表数据
     """
-    sql = "select securities_code,securities_name,stock_code,first_industry,second_industry,third_industry,four_industry,industry_cls_code,industry_cls_name from stock_info";
-    db = DbConnect(dbinfo, database="stock_info")
+    sql = "select securities_code,securities_name,stock_code from stock_info where is_deleted = 0";
+    db = DbConnect(dbinfo, database="milvus_data")
     result = db.select(sql)
     db.close()
     # 以json格式输出到控制台

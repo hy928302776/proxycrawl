@@ -145,7 +145,7 @@ def download_page(url: str):
     crawUrl = f"{crowBaseUrl}&url={urllib.parse.quote(url)}"
     print(f"crawUrl:{crawUrl}")
     starttime = int(time.time() * 1000)
-    response = requests.get(url)
+    response = requests.get(crawUrl)
     print(f"response:{response}，耗时：{int(time.time() * 1000) - starttime}")
     if response.status_code == 200:
         # 以下为乱码异常处理
