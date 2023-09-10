@@ -3,7 +3,7 @@ import sys
 
 from pymongo import UpdateOne
 
-from core.storage import MilvusStore
+from storage import MilvusStore
 from storage.MongoDbStore import MongoDbStore
 
 if __name__ == '__main__':
