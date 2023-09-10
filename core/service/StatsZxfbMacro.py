@@ -120,18 +120,21 @@ def stats_zxfb(beginTime: str, endTime: str, bStore: bool = True):  # 两个参�
         pageIndex += 1
         err_count = 0
 
+    content = f"完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据,异常数据{len(errorList)}条"
+    print(content)
+
     # 异常数据处理
     if bStore:
         if len(errorList) > 0:
             MongoDbStore("aifin_stock_error").storeData(errorList, -1).close()
 
         # 日志入库
-        content = f"完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据,异常数据{len(errorList)}条"
+
         logdata = [{"type": type,
                     "createTime": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                     "content": content}]
         MongoDbStore("aifin_logs").storeData(logdata, 0).close()
-        print(content)
+
 
 
 if __name__ == "__main__":

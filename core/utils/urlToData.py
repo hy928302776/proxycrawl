@@ -146,11 +146,11 @@ def get_text(url):
         return text, f"解析网页内容异常:{e}"
 
 
-def download_page(url: str):
+def download_page(url: str,useproxy:bool=True):
     if not url or len(url.strip()) == 0:
         return ""
     print(f"url:{url}")
-    crawUrl = f"{crowBaseUrl}&url={urllib.parse.quote(url)}"
+    crawUrl = f"{crowBaseUrl}&url={urllib.parse.quote(url)}" if useproxy else url
     print(f"crawUrl:{crawUrl}")
     starttime = int(time.time() * 1000)
     response = requests.get(crawUrl)
@@ -172,13 +172,14 @@ def download_page(url: str):
         return text
     else:
         print("failed to download the page")
-        try:
-            if response:
-                print(json.dumps(response))
-            else:
-                print("response is None")
-        except:
-            print("解析response异常")
+        raise Exception(f"获取页面数据异常：{crawUrl}")
+        # try:
+        #     if response:
+        #         print(json.dumps(response))
+        #     else:
+        #         print("response is None")
+        # except:
+        #     print("解析response异常")
 
 
 if __name__ == '__main__':
