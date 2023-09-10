@@ -52,11 +52,7 @@ def allStockInfo()->list:
     db = DbConnect(dbinfo, database="milvus_data")
     result = db.select(sql)
     db.close()
-    # 以json格式输出到控制台
-    data=None
-    if result and len(result)>0:
-        data = json.dumps(result, ensure_ascii=False)
-    return data
+    return result
 
 def batchStockInfo(start:int,offset:int)->list:
     """
