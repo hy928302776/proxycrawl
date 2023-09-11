@@ -3,7 +3,7 @@ import sys
 
 from pymongo import UpdateOne
 
-from storage.MySqlStore import allStockInfo
+from storage.MySqlStore import batchStockInfo
 from storage import MilvusStore
 from storage.MongoDbStore import MongoDbStore
 
@@ -23,7 +23,6 @@ def pre(stock: str):
     ]
     query = {"$and": collects}
     count = dbStore.countData(query)
-    print("============================")
     print(f"一共有{count}条数据需要处理")
 
     total = 0  # 统计处理数据总数
@@ -63,10 +62,11 @@ def pre(stock: str):
 
 
 if __name__ == '__main__':
-    stockList: list = allStockInfo()
+    stockList: list = batchStockInfo()
     if stockList and len(stockList) > 0:
         num = 0
         for stock in stockList:
             num += 1
+            print("============================")
             print(f"一共获取到了{len(stockList)}支股票，现在处理第{num}个：{stock}")
             pre(stock['stock_code'])
