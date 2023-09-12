@@ -1,6 +1,6 @@
 import sys
 
-from storage.MySqlStore import batchStockInfo
+from storage.MySqlStore import  MainDb
 from service.StockEastmoneyNews import eastmoney
 
 if __name__ == "__main__":
@@ -15,7 +15,7 @@ if __name__ == "__main__":
     # print(f"参数列表，domain:{domain},code:{code},type:{type},startPage:{startPage}")
     # eastmoney(code, type, int(startPage))
     print(f"参数列表，start:{start},offset:{offset},beginTime:{beginTime},endTime:{endTime}")
-    stockList: list = batchStockInfo(int(start), int(offset))
+    stockList: list = MainDb().batchStockInfo(int(start), int(offset))
     if stockList and len(stockList) > 0:
         num = 0
         for stock in stockList:

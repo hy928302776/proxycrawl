@@ -3,12 +3,6 @@ import json
 
 import pymysql
 
-dbinfo = {
-    "host": "36.138.93.247",
-    "user": "root",
-    "password": "QAZwsx123",
-    "port": 31652}
-
 
 class DbConnect():
     def __init__(self, db_cof, database=""):
@@ -46,45 +40,76 @@ class DbConnect():
         # 关闭连接
         self.db.close()
 
-def batchStockInfo(start: int=None, offset: int=None) -> list:
-    """
-    获取所有的表数据
-    """
 
-    sqlList = [f"select securities_code,securities_name,stock_code from stock_info where is_deleted = 0"]
+class MainDb(DbConnect):
+    dbinfo = {
+        "host": "36.138.93.247",
+        "user": "root",
+        "password": "QAZwsx123",
+        "port": 31652}
 
-    sqlList.append(" ORDER BY id")
-    if start is not None and offset is not None:
-        sqlList.append(f" limit {start},{offset}")
-    sql = " ".join(sqlList)
-    print(f"sql:{sql}")
-    db = DbConnect(dbinfo, database="milvus_data")
-    result = db.select(sql)
-    db.close()
-    return result
+    def __init__(self):
+        super().__init__(self.dbinfo, "milvus_data")
 
-def batchIndustryInfo(belong:str, start: int=None, offset: int=None) -> list:
-    """
-    获取所有的表数据
-    """
+    def batchStockInfo(self, start: int = None, offset: int = None) -> list:
+        """
+        获取所有的表数据
+        """
 
-    sqlList = [f"select industry_code,industry_name,belong from industry_info where is_deleted = 0"]
+        sqlList = [f"select securities_code,securities_name,stock_code from stock_info where is_deleted = 0"]
 
-    if belong is not None:
-        sqlList.append(f" and belong='{belong}'")
+        sqlList.append(" ORDER BY id")
+        if start is not None and offset is not None:
+            sqlList.append(f" limit {start},{offset}")
+        sql = " ".join(sqlList)
+        print(f"sql:{sql}")
+        ##db = self(dbinfo, database="milvus_data")
+        result = self.select(sql)
+        self.close()
+        return result
 
-    sqlList.append(" ORDER BY id")
-    if start is not None and offset is not None:
-        sqlList.append(f" limit {start},{offset}")
-    sql = " ".join(sqlList)
-    print(f"sql:{sql}")
-    db = DbConnect(dbinfo, database="milvus_data")
-    result = db.select(sql)
-    db.close()
-    return result
+    def batchIndustryInfo(self, belong: str, start: int = None, offset: int = None) -> list:
+        """
+        获取所有的表数据
+        """
+
+        sqlList = [f"select industry_code,industry_name,belong from industry_info where is_deleted = 0"]
+
+        if belong is not None:
+            sqlList.append(f" and belong='{belong}'")
+
+        sqlList.append(" ORDER BY id")
+        if start is not None and offset is not None:
+            sqlList.append(f" limit {start},{offset}")
+        sql = " ".join(sqlList)
+        print(f"sql:{sql}")
+        result = self.select(sql)
+        self.close()
+        return result
+
+
+class TlDb(DbConnect):
+    dbinfo = {
+        "host": "36.138.94.158",
+        "user": "root",
+        "password": "juw&2155FR345&$",
+        "port": 23456}
+
+    def __init__(self):
+        super().__init__(self.dbinfo, "sdsg")
+
+    def listSecurityIdsByStock(self):
+        maindbList = MainDb().batchStockInfo()
+        print(f"有{len(maindbList)}个数据")
+        if maindbList:
+            stocklist:list[str] = [f"'{data['stock_code']}'" for data in maindbList]
+            print(f"fdf:{','.join(stocklist)}")
+            sql = f"SELECT SECURITY_ID,TICKER_SYMBOL,SEC_SHORT_NAME FROM md_security WHERE TICKER_SYMBOL IN({','.join(stocklist)})"
+            print(f"sql:{sql}")
+
 
 
 
 
 if __name__ == '__main__':
-    print(batchIndustryInfo("cls"))
+    TlDb().listSecurityIdsByStock()

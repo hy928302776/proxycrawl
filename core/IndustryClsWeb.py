@@ -1,7 +1,7 @@
 import sys
 
 from service.IndustryCls import cls_industry_data
-from storage.MySqlStore import batchIndustryInfo
+from storage.MySqlStore import MainDb
 
 if __name__ == "__main__":
     beginTime = None
@@ -23,7 +23,7 @@ if __name__ == "__main__":
         offset = int(offset[0])
     print(f"参数列表,start:{start},offset:{offset}，beginTime:{beginTime},endTime:{endTime}")
 
-    industryList: list = batchIndustryInfo("cls", start, offset)
+    industryList: list = MainDb().batchIndustryInfo("cls", start, offset)
     if industryList and len(industryList) > 0:
         num = 0
         for industry in industryList:
