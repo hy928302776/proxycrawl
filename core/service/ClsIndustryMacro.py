@@ -1,115 +1,148 @@
-#财联社行业宏观
+# 财联社行业宏观
 
 import datetime
 import json
+import sys
 import urllib.parse
 import time
 import requests
 
-from ..config.common_config import crowBaseUrl
-from ..utils.urlToData import get_text
+from core.storage import MilvusStore
+from core.storage.MongoDbStore import MongoDbStore
+
+sys.path.append("..")
+from utils.urlToData import download_page
+from config.common_config import crowBaseUrl
+from utils.urlToData import get_text
 
 
-def eastmoney(industryCode: str,industryName:str, type: str):  # 两个参数分别表示开始读取与结束读取的页码
-
+def cls_industry_data(industryCode: str, industryName: str, beginTime: str = None, endTime: str = None,
+                      bStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
 
     # 遍历每一个URL
-    total = 0
+    type = "cls_industry"  # 此次查询类型
+    total = 0  # 统计总数量
+    valid_data_total = 0  # 统计有效数据
+    err_count = 0  # 统计异常次数
+    errorList: list = []  # 统计异常信息
+    # （1）初始化开始时间和结束时间
+    beginTimeStamp = int(datetime.datetime.combine((datetime.date.today() - datetime.timedelta(days=1)),
+                                                   datetime.time.min).timestamp()) if not beginTime else int(
+        datetime.datetime.strptime(beginTime, '%Y-%m-%d %H:%M:%S').timestamp())
+
+    endTimeStamp = int(
+        datetime.datetime.combine(datetime.datetime.today(), datetime.time.min).timestamp()) if not endTime else int(
+        datetime.datetime.strptime(endTime, '%Y-%m-%d %H:%M:%S').timestamp())
+    # （2）循环获取数据列表
     flag = True
-    count = 0
-    pageIndex=1
-    pageSize=10
-    startPage=None
-    endTime = datetime.date.today()
-    beginTime = endTime
-    if type == "2":
-        beginTime = endTime - datetime.timedelta(days=2*365)
-
-    analysis_method = {
-        "element": "div",
-        "attr": {"class": "ctx-content"},
-    }
-
-    while flag and count < 5:
-        print(f"开始获取第{pageIndex}页数据")
-        st = int(round(time.time() * 1000))
-        link = f"https://reportapi.eastmoney.com/report/list?industryCode={industryCode}&pageSize={pageSize}&industry=*&rating=*&ratingChange=*&beginTime={beginTime}&endTime={endTime}&pageNo={pageIndex}&fields=&qType=1&orgCode=&rcode=&_={st}"
+    while flag and err_count < 5:
+        endTime_str = datetime.datetime.fromtimestamp(endTimeStamp).strftime('%Y-%m-%d %H:%M:%S')
+        print(f"开始获取{endTime_str}以来的数据")
+        # （3）组装请求路径
+        link = f"https://www.cls.cn/api/subject/{industryCode}/article?app=CailianpressWeb&last_article_time={endTimeStamp}&os=web&Subject_Id={industryCode}&sv=7.7.5"
         print(f"link:{link}")  # 用于检查
-        crawUrl = f"{crowBaseUrl}&url={urllib.parse.quote(link)}"
+        # crawUrl = f"{crowBaseUrl}&url={urllib.parse.quote(link)}"
+        # （4）获取请求列表数据
         try:
-            response = requests.get(crawUrl, verify=False, timeout=30)  # 禁止重定向
-            print(response.text)
+            content = download_page(link, bStore, headers={'user-agent': 'Mozilla/5.0'})
+            # response = requests.get(crawUrl, verify=False, timeout=30)  # 禁止重定向
         except:
-            count += 1
+            err_count += 1
             continue
-        content = response.text
         # 读取的是json文件。因此就用json打开啦
         jsonContent = json.loads(content)
-        data=[]
+        data = []
         if "data" in jsonContent:
-            data=jsonContent['data']
+            data = jsonContent['data']
 
-        print(f"获取第{pageIndex}页的数据，大小为{len(data)}")
+        print(f"获取了{endTime_str}以来的{len(data)}条数据")
+        # （5）解析单条数据
         storageList: list = []
         for i in range(0, len(data)):
             print("\n---------------------")
-            try:
-                total += 1
-                print(f"开始处理第{total}条数据：{data[i]}")
-                url = f"https://data.eastmoney.com/report/zw_industry.jshtml?infocode={data[i]['infoCode']}"
-                text=get_text(url,analysis_method)
-                text = text.replace("\n\n", "").replace("  ", "")
-                abstract = ""
-                if text and len(text)>0:
-                    abstract = text[0:100]
+            total += 1
+            element_data = data[i]
+            print(f"开始处理第{total}条数据：{element_data}")
+            # （6）通过日期判断是否符合条件
+            s_datetime = element_data['article_time']
 
-                # 数据处理
-                metadata = {"source": "Web",
-                            "uniqueId": data[i]['infoCode'],
-                            "code": industryCode,
-                            "name": industryName,
-                            "url": url,
-                            "date": data[i]['publishDate'],
-                            "type": "eastmoney-industry-report",
-                            "createTime": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                            "abstract": abstract,
-                            "title": data[i]['title'],
-                            "text":text}
+            if beginTimeStamp > s_datetime:
+                print("比开始时间还小，直接结束本次任务")
+                flag = False
+                break
+            if endTimeStamp < s_datetime:
+                print(f"比结束时间还大，终止并继续下个循环")
+                continue
+
+            # （7）获取字段数据数据
+            url = f"https://www.cls.cn/detail/{element_data['article_id']}"
+            text, err = get_text(url, bStore, headers={'user-agent': 'Mozilla/5.0'})
+            abstract = element_data['article_brief']
+            if (abstract is None or len(abstract) == 0) and text is not None and len(text) > 0:
+                abstract = text[0:100]
+
+            # 数据处理
+            metadata = {"source": "Web",
+                        "uniqueId": element_data['article_id'],
+                        "code": industryCode,
+                        "name": industryName,
+                        "url": url,
+                        "date": datetime.datetime.fromtimestamp(s_datetime).strftime('%Y-%m-%d %H:%M:%S'),
+                        "type": type,
+                        "createTime": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                        "abstract": abstract,
+                        "title": element_data['article_title'],
+                        "text": text}
+
+            if text:
                 storageList.append(metadata)
+            else:
+                errdata = {"err": err}
+                errdata.update(metadata)
+                errorList.append(errdata)
 
-                print(f"第{total}条数据处理完成,数据内容：{json.dumps(metadata,ensure_ascii=False)}")
-                print("\n")
+            # 重置endTimeStamp时间，以循环获取后续的数据
+            endTimeStamp = s_datetime
+            valid_data_total += 1  # 统计有效数据
 
-            except Exception as e:
-                print(
-                    f"获取第【{pageIndex}】页的第【{i}】条数据,title:{data[i]['title']},url:{data[i]['url']}时异常，异常信息：{e}")
+            print(f"第{total}条数据处理完成,数据内容：{json.dumps(metadata, ensure_ascii=False)}")
+            print("\n")
 
-        if len(storageList) > 0:
-            pass
+        if bStore and len(storageList) > 0:
             # 存入矢量库
-            #MilvusStore.storeData(storageList,f"aifin_industry_{industryCode}","8.217.52.63:19530")
-            # 存入es库
-            #EsStore.storeData(storageList, f"aifin_industry", "8.217.110.233:9200")
+            status = 0
+            try:
+                MilvusStore.storeData(storageList, f"aifin_industry_{industryCode}")
+            except Exception as e:
+                print(f"{endTime_str}以来的{len(data)}条数据， 存入矢量库异常:{e}")
+                status = -1
+            # 存入mongoDB库
+            MongoDbStore("aifin_industry").storeData(storageList, status).close()
 
-        print(f"第{pageIndex}页数据处理完成")
+        print(f"获取{endTime_str}以来的{len(data)}条数据处理完成")
         print("\n")
-        if len(data) < pageSize:
-            break
-        pageIndex += 1
-        count=0
+        # 重置err_count判断条件
+        err_count = 0
 
-    print(f"处理完成，从{startPage}-{pageIndex}页，一共处理{total}条数据")
+    beginTime_str = datetime.datetime.fromtimestamp(beginTimeStamp).strftime('%Y-%m-%d %H:%M:%S')
+    content = f"完成了从{beginTime_str}到{endTime_str}内的数据，一共处理{total}条数据,有效数据{valid_data_total}条,异常数据{len(errorList)}条"
+    print(content)
+    # 异常数据处理
+    if bStore:
+        if len(errorList) > 0:
+            MongoDbStore("aifin_stock_error").storeData(errorList, -1).close()
 
+        # 日志入库
 
-
-
+        logdata = [{"type": type,
+                    "createTime": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    "content": content}]
+        MongoDbStore("aifin_logs").storeData(logdata, 0).close()
 
 
 if __name__ == "__main__":
-    # domain = sys.argv[1]  # 域名
-    # code = sys.argv[2]  # 股票代码
-    # type = sys.argv[3]  # 增量1，全量2
-    # startPage = sys.argv[4]  # 从第几页
-    # print(f"参数列表，domain:{domain},code:{code},type:{type},startPage:{startPage}")
-    # eastmoney(code, type, int(startPage))
-    eastmoney("1202","家电", "2", 1)
+    industryCode = '1279'
+    industryName = '半导体'
+    beginTime = '2023-09-10 00:00:00'
+    endTime = '2023-09-11 00:00:00'
+    cls_industry_data(industryCode, industryName, beginTime, endTime, False)

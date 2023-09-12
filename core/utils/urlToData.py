@@ -15,87 +15,100 @@ from config.common_config import crowBaseUrl
 
 analysis_method = [
     {"domain": "http://caifuhao.eastmoney.com/news/",
-     "value": {
+     "value": [{
          "element": "div",
          "attr": {"class": "article-body"},
-     },
+     }],
      "replace": ["\n\n", "  "],
      "temp": "http://caifuhao.eastmoney.com/news/20230828194502076311480"
      },
 
     {"domain": "http://blog.eastmoney.com/",
-     "value": {
+     "value": [{
          "element": "div",
          "attr": {"class": "stockcodec"},
-     },
+     }],
      "replace": ["\n\n", "  ", '</em>', '<em>'],
      "temp": "http://blog.eastmoney.com/k7529386105985542/blog_1345979348.html"
      },
     {"domain": "https://data.eastmoney.com/report/info/",
-     "value": {
+     "value": [{
          "element": "div",
          "attr": {"class": "newsContent"},
-     },
+     }],
      "replace": ["\n\n", "  "],
      "temp": "https://data.eastmoney.com/report/info/AP000000000334343.html"
      },
     {"domain": "https://data.eastmoney.com/report/zw_industry.jshtml?infocode",
-     "value": {
+     "value": [{
          "element": "div",
          "attr": {"class": "ctx-content"},
-     },
+     }],
      "replace": ["\n\n", "  "],
      "temp": "https://data.eastmoney.com/report/zw_industry.jshtml?infocode=AN122334534556"
      },
     {"domain": "http://finance.eastmoney.com/a/",
-     "value": {
+     "value": [{
          "element": "div",
          "attr": {"class": "txtinfos"},
-     },
+     }],
      "replace": ["\n\n", "  ", "<em>", "</em>"],
      "temp": "http://finance.eastmoney.com/a/202309052838047556.html"
      },
     {"domain": "https://finance.eastmoney.com/a/",
-     "value": {
+     "value": [{
          "element": "div",
          "attr": {"class": "txtinfos"},
-     },
+     }],
      "replace": ["\n\n", "  "],
      "temp": "https://finance.eastmoney.com/a/202309052838047556.html"
      },
     {"domain": "http://www.pbc.gov.cn/goutongjiaoliu/113456/113469/index.html",
-     "value": {
+     "value": [{
          "element": "div",
          "attr": {"class": "txtinfos"},
-     },
+     }],
      "replace": ["\n\n", "  "],
      "temp": "http://www.pbc.gov.cn/goutongjiaoliu/113456/113469/index.html"
      },
     {"domain": "http://www.stats.gov.cn/sj/zxfb/",
-     "value": {
+     "value": [{
          "element": "div",
          "attr": {"class": "txt-content"},
-     },
+     }],
      "extract": ["table"],
      "replace": ["\n\n", "  "],
      "temp": "http://www.stats.gov.cn/sj/zxfb/202309/t20230909_1942695.html"
      },
     {"domain": "http://www.stats.gov.cn/sj/sjjd/",
-     "value": {
+     "value": [{
          "element": "div",
          "attr": {"class": "txt-content"},
-     },
+     }],
      "extract": ["table"],
      "replace": ["\n\n", "  "],
      "temp": "http://www.stats.gov.cn/sj/sjjd/202309/t20230909_1942694.html"
      },
     {"domain": "http://stock.eastmoney.com/a/",
-     "value": {
+     "value": [{
          "element": "div",
          "attr": {"class": "txtinfos"},
-     },
+     }],
      "replace": ["\n\n", "  "],
      "temp": "http://stock.eastmoney.com/a/202309092842368482.html"
+     },
+    {"domain": "https://www.cls.cn/detail/",
+     "value": [
+         {
+             "element": "div",
+             "attr": {"class": "detail-content"},
+         }, {
+             "element": "div",
+             "attr": {"class": "detail-telegraph-content"},
+         }
+     ],
+     "replace": ["\n\n", "  "],
+     "temp": "https://www.cls.cn/detail/1459566"
      },
 ]
 
@@ -106,12 +119,12 @@ def get_analysis_method(url: str) -> Dict:
             return item
 
 
-def get_text(url):
+def get_text(url, useproxy: bool = True, **kwargs):
     text = None
     try:
         item = get_analysis_method(url)
         if item:
-            soup = BeautifulSoup(download_page(url))
+            soup = BeautifulSoup(download_page(url, useproxy, **kwargs))
 
             # （1）过滤不想要的标签,如果有多个标签也可以逗号分割：
             if "extract" in item:
@@ -123,8 +136,12 @@ def get_text(url):
 
             # （3）获取内容
             if "value" in item:
-                elementLab = soup.find(item['value']['element'], item['value']['attr'])
-                text = elementLab.get_text()
+                textlist = []
+                for pre_value in item['value']:
+                    elementLab = soup.find_all(pre_value['element'], pre_value['attr'])
+                    for pre_elementLab in elementLab:
+                        textlist.append(pre_elementLab.get_text())
+                text = "".join(textlist)
             else:
                 text = soup.get_text()
 
@@ -146,14 +163,14 @@ def get_text(url):
         return text, f"解析网页内容异常:{e}"
 
 
-def download_page(url: str,useproxy:bool=True):
+def download_page(url: str, useproxy: bool = True, **kwargs):
     if not url or len(url.strip()) == 0:
         return ""
     print(f"url:{url}")
     crawUrl = f"{crowBaseUrl}&url={urllib.parse.quote(url)}" if useproxy else url
     print(f"crawUrl:{crawUrl}")
     starttime = int(time.time() * 1000)
-    response = requests.get(crawUrl)
+    response = requests.get(crawUrl, **kwargs)
     print(f"response:{response}，耗时：{int(time.time() * 1000) - starttime}")
     if response.status_code == 200:
         # 以下为乱码异常处理
@@ -183,7 +200,6 @@ def download_page(url: str,useproxy:bool=True):
 
 
 if __name__ == '__main__':
-    text, err = get_text("http://stock.eastmoney.com/a/202309092842368482.html")
-    print()
-    # print(text)
-    print(err)
+    # text, err = get_text("http://stock.eastmoney.com/a/202309092842368482.html")
+    test, err = get_text("https://www.cls.cn/detail/1459408", False, headers={'user-agent': 'Mozilla/5.0'})
+    print(test)
