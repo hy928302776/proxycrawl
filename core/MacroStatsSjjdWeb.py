@@ -1,6 +1,6 @@
 import sys
 
-from service.KuaixunMacro import kuaixun_macro
+from service.MacroStatsSjjd import stats_sjjd
 
 if __name__ == '__main__':
     beginTime = None
@@ -8,4 +8,4 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         beginTime = sys.argv[1]  # 开始时间
         endTime = sys.argv[2]  # 结束时间"2023-08-28"
-    kuaixun_macro(beginTime, endTime, True)
+    stats_sjjd(beginTime, endTime, True)

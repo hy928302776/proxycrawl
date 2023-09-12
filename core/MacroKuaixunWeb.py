@@ -1,6 +1,6 @@
 import sys
 
-from service.StatsZxfbMacro import stats_zxfb
+from service.MacroKuaixun import kuaixun_macro
 
 if __name__ == '__main__':
     beginTime = None
@@ -8,4 +8,4 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         beginTime = sys.argv[1]  # 开始时间
         endTime = sys.argv[2]  # 结束时间"2023-08-28"
-    stats_zxfb(beginTime, endTime, True)
+    kuaixun_macro(beginTime, endTime, True)

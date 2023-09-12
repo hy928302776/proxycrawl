@@ -63,8 +63,28 @@ def batchStockInfo(start: int=None, offset: int=None) -> list:
     db.close()
     return result
 
+def batchIndustryInfo(belong:str, start: int=None, offset: int=None) -> list:
+    """
+    获取所有的表数据
+    """
+
+    sqlList = [f"select industry_code,industry_name,belong from industry_info where is_deleted = 0"]
+
+    if belong is not None:
+        sqlList.append(f" and belong='{belong}'")
+
+    sqlList.append(" ORDER BY id")
+    if start is not None and offset is not None:
+        sqlList.append(f" limit {start},{offset}")
+    sql = " ".join(sqlList)
+    print(f"sql:{sql}")
+    db = DbConnect(dbinfo, database="milvus_data")
+    result = db.select(sql)
+    db.close()
+    return result
+
 
 
 
 if __name__ == '__main__':
-    print(batchStockInfo())
+    print(batchIndustryInfo("cls"))

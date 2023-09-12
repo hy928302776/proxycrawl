@@ -7,12 +7,12 @@ import urllib.parse
 import time
 import requests
 
-from core.storage import MilvusStore
-from core.storage.MongoDbStore import MongoDbStore
+
 
 sys.path.append("..")
+from storage import MilvusStore
+from storage.MongoDbStore import MongoDbStore
 from utils.urlToData import download_page
-from config.common_config import crowBaseUrl
 from utils.urlToData import get_text
 
 
