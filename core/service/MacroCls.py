@@ -1,13 +1,8 @@
-#=============财联社行业数据==============
+# =============财联社宏观数据==============
 
 import datetime
 import json
 import sys
-import urllib.parse
-import time
-import requests
-
-
 
 sys.path.append("..")
 from storage import MilvusStore
@@ -16,11 +11,11 @@ from utils.urlToData import download_page
 from utils.urlToData import get_text
 
 
-def cls_industry_data(industryCode: str, industryName: str, beginTime: str = None, endTime: str = None,
-                      bStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
+def cls_macro_data(industryCode: str, industryName: str, beginTime: str = None, endTime: str = None,
+                   bStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
 
     # 遍历每一个URL
-    type = "cls_industry"  # 此次查询类型
+    type = "cls_macro"  # 此次查询类型
     total = 0  # 统计总数量
     valid_data_total = 0  # 统计有效数据
     err_count = 0  # 统计异常次数
@@ -84,14 +79,13 @@ def cls_industry_data(industryCode: str, industryName: str, beginTime: str = Non
             # 数据处理
             metadata = {"source": "Web",
                         "uniqueId": element_data['article_id'],
-                        "code": industryCode,
-                        "name": industryName,
                         "url": url,
                         "date": datetime.datetime.fromtimestamp(s_datetime).strftime('%Y-%m-%d %H:%M:%S'),
                         "type": type,
                         "createTime": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                         "abstract": abstract,
                         "title": element_data['article_title'],
+                        "mediaName": "财联社",
                         "text": text}
 
             if text:
@@ -112,12 +106,12 @@ def cls_industry_data(industryCode: str, industryName: str, beginTime: str = Non
             # 存入矢量库
             status = 0
             try:
-                MilvusStore.storeData(storageList, f"aifin_industry_{industryCode}")
+                MilvusStore.storeData(storageList, f"aifin_macro")
             except Exception as e:
                 print(f"{endTime_str}以来的{len(data)}条数据， 存入矢量库异常:{e}")
                 status = -1
             # 存入mongoDB库
-            MongoDbStore("aifin_industry").storeData(storageList, status).close()
+            MongoDbStore("aifin_macro").storeData(storageList, status).close()
 
         print(f"获取{endTime_str}以来的{len(data)}条数据处理完成")
         print("\n")
@@ -141,8 +135,16 @@ def cls_industry_data(industryCode: str, industryName: str, beginTime: str = Non
 
 
 if __name__ == "__main__":
-    industryCode = '1279'
-    industryName = '半导体'
+    datalist = [
+        {"industryCode": "1103", "industryName": "A股盘面直播"},
+        {"industryCode": "1486", "industryName": "回购股票"},
+        {"industryCode": "1399", "industryName": "次新股"},
+        {"industryCode": "1443", "industryName": "业绩预增"},
+        {"industryCode": "1381", "industryName": "停复牌动态"},
+        {"industryCode": "1452", "industryName": "股权转让"},
+        {"industryCode": "1760", "industryName": "壳资源"},
+    ]
     beginTime = '2023-09-10 00:00:00'
     endTime = '2023-09-11 00:00:00'
-    cls_industry_data(industryCode, industryName, beginTime, endTime, False)
+    for data in datalist:
+        cls_macro_data(data['industryCode'], data['industryName'], beginTime, endTime, False)

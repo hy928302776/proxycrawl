@@ -12,7 +12,6 @@ import uuid
 sys.path.append("..")
 import datetime
 import json
-from bs4 import BeautifulSoup
 from utils.urlToData import download_page, get_text
 from storage import MilvusStore
 from storage.MongoDbStore import MongoDbStore
