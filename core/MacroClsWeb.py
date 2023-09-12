@@ -1,6 +1,6 @@
 import sys
 
-from core.service.MacroCls import cls_macro_data
+from service.MacroCls import cls_macro_data
 
 datalist = [
     {"industryCode": "1103", "industryName": "A股盘面直播"},
