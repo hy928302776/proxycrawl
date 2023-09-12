@@ -6,7 +6,7 @@ from storage.MySqlStore import batchIndustryInfo
 if __name__ == "__main__":
     beginTime = None
     endTime = None
-    if len(sys.argv) > 3:
+    if len(sys.argv) > 1:
         beginTime = sys.argv[3]  # 开始时间 "2023-08-27 00:00:00"
         endTime = sys.argv[4]  # 结束时间"2023-08-28 00:00:00"
     # startPage = sys.argv[4]  # 从第几页
