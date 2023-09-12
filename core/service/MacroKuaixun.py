@@ -7,8 +7,6 @@ if __name__ == '__main__':
 
 import sys
 import uuid
-
-# ============  国家统计局-数据解读===========
 sys.path.append("..")
 import datetime
 import json
