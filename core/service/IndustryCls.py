@@ -92,6 +92,7 @@ def cls_industry_data(industryCode: str, industryName: str, beginTime: str = Non
                         "createTime": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                         "abstract": abstract,
                         "title": element_data['article_title'],
+                        "mediaName": "财联社",
                         "text": text}
 
             if text:
