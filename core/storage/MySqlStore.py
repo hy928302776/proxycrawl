@@ -68,7 +68,7 @@ class MainDb(DbConnect):
         self.close()
         return result
 
-    def batchIndustryInfo(self, belong: str, start: int = None, offset: int = None) -> list:
+    def batchIndustryInfo(self, belong: str=None, start: int = None, offset: int = None) -> list:
         """
         获取所有的表数据
         """
