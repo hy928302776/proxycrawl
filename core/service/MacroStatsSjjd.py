@@ -16,6 +16,7 @@ def stats_sjjd(beginTime: str, endTime: str, bStore: bool = True):  # 两个参�
     # 遍历每一个URL
     type = "stats_sjjd"  # 此次查询类型
     total = 0  # 统计总数量
+    valid_data_total = 0  # 统计有效数据
     pageIndex = 1  # 起始业
     err_count = 0  # 统计异常次数
     errorList: list = []  # 统计异常信息
@@ -99,8 +100,10 @@ def stats_sjjd(beginTime: str, endTime: str, bStore: bool = True):  # 两个参�
                 errdata.update(metadata)
                 errorList.append(errdata)
 
+            valid_data_total += 1
             print(f"第{total}条数据处理完成,数据内容：{json.dumps(metadata, ensure_ascii=False)}")
             print("\n")
+
 
         if bStore and len(storageList) > 0:
             # 存入矢量库
@@ -118,7 +121,7 @@ def stats_sjjd(beginTime: str, endTime: str, bStore: bool = True):  # 两个参�
         pageIndex += 1
         err_count = 0
 
-    content = f"完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据,异常数据{len(errorList)}条"
+    content = f"完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据,有效数据{valid_data_total}条,异常数据{len(errorList)}条"
     print(content)
     # 异常数据处理
     if bStore:
