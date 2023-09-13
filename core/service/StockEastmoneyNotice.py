@@ -9,12 +9,10 @@ import urllib.parse
 
 import requests
 
-from core.utils.urlToData import download_page
+
 
 sys.path.append("..")
-from config.common_config import crowBaseUrl
-from config.Logger import logger
-from utils.urlToData import get_text
+from utils.urlToData import download_page
 from storage import MilvusStore
 from storage.MongoDbStore import MongoDbStore
 
