@@ -13,8 +13,6 @@ import requests
 
 sys.path.append("..")
 from utils.urlToData import download_page
-from config.common_config import crowBaseUrl
-from config.Logger import logger
 from utils.urlToData import get_text
 from storage import MilvusStore
 from storage.MongoDbStore import MongoDbStore

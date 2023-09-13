@@ -11,7 +11,6 @@ import requests
 sys.path.append("..")
 from config.common_config import crowBaseUrl
 from storage import MilvusStore
-from storage.MySqlStore import batchStockInfo
 from storage.MongoDbStore import MongoDbStore
 from utils.urlToData import get_text
 

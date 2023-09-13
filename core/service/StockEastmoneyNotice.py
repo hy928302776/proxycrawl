@@ -7,9 +7,6 @@ import sys
 import time
 import urllib.parse
 
-import requests
-
-
 
 sys.path.append("..")
 from utils.urlToData import download_page

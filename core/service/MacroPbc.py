@@ -10,7 +10,7 @@ import urllib.parse
 import requests
 from bs4 import BeautifulSoup
 
-from core.utils.urlToData import download_page
+from utils.urlToData import download_page
 
 sys.path.append("..")
 from config.common_config import crowBaseUrl
