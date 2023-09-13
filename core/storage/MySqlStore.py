@@ -99,17 +99,20 @@ class TlDb(DbConnect):
         super().__init__(self.dbinfo, "sdsg")
 
     def listSecurityIdsByStock(self):
-        maindbList = MainDb().batchStockInfo()
-        print(f"有{len(maindbList)}个数据")
-        if maindbList:
-            stocklist:list[str] = [f"'{data['stock_code']}'" for data in maindbList]
-            print(f"fdf:{','.join(stocklist)}")
-            sql = f"SELECT SECURITY_ID,TICKER_SYMBOL,SEC_SHORT_NAME FROM md_security WHERE TICKER_SYMBOL IN({','.join(stocklist)})"
-            print(f"sql:{sql}")
+        # maindbList = MainDb().batchStockInfo()
+        # print(f"有{len(maindbList)}个数据")
+        # if maindbList:
+        #     stocklist:list[str] = [f"'{data['stock_code']}'" for data in maindbList]
+        #     print(f"fdf:{','.join(stocklist)}")
+        sql = f"SELECT SECURITY_ID,TICKER_SYMBOL,SEC_SHORT_NAME FROM md_security limit 10"
+        print(f"sql:{sql}")
+        result = self.select(sql)
+        self.close()
+        return result
 
 
 
 
 
 if __name__ == '__main__':
-    TlDb().listSecurityIdsByStock()
+    print(TlDb().listSecurityIdsByStock())

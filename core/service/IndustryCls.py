@@ -83,7 +83,7 @@ def cls_industry_data(industryCode: str, industryName: str, beginTime: str = Non
 
             # 数据处理
             metadata = {"source": "Web",
-                        "uniqueId": element_data['article_id'],
+                        "uniqueId": str(element_data['article_id']),
                         "code": industryCode,
                         "name": industryName,
                         "url": url,
