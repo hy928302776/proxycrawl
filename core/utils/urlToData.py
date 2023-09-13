@@ -150,7 +150,7 @@ def get_text(url, useproxy: bool = True, **kwargs):
                 for t in item['replace']:
                     text = text.replace(t, "")
 
-                # （5）删除两个换行符之间的任意数量的空白字符
+            # （5）删除两个换行符之间的任意数量的空白字符
             text = re.sub(r'\n\s*\n', r'\n\n', text.strip(), flags=re.M)
             return text, None
         else:

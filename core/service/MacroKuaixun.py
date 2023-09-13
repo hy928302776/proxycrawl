@@ -86,7 +86,7 @@ def kuaixun_macro(beginTime: str, endTime: str, bStore: bool = True):  # 两个�
 
             # 数据处理
             metadata = {"source": "Web",
-                        "uniqueId": newsid,
+                        "uniqueId": str(newsid),
                         "url": url,
                         "date": showtime,
                         "type": type,

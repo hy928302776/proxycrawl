@@ -78,7 +78,7 @@ def cls_macro_data(industryCode: str, industryName: str, beginTime: str = None, 
 
             # 数据处理
             metadata = {"source": "Web",
-                        "uniqueId": element_data['article_id'],
+                        "uniqueId": str(element_data['article_id']),
                         "url": url,
                         "date": datetime.datetime.fromtimestamp(s_datetime).strftime('%Y-%m-%d %H:%M:%S'),
                         "type": type,
