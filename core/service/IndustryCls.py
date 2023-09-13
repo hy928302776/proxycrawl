@@ -131,7 +131,7 @@ def cls_industry_data(industryCode: str, industryName: str, beginTime: str = Non
     # 异常数据处理
     if bStore:
         if len(errorList) > 0:
-            MongoDbStore("aifin_stock_error").storeData(errorList, -1).close()
+            MongoDbStore("aifin_industry_error").storeData(errorList, -1).close()
 
         # 日志入库
 

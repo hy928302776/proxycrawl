@@ -17,7 +17,7 @@ from utils.urlToData import get_text
 
 
 def eastmoney(code: str, stockName: str, beginTime: str, endTime: str, bStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
-
+    type = "eastmoney-stock-report"
     # 遍历每一个URL
     total = 0
     pageIndex = 1
@@ -72,7 +72,7 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str, bStore: b
                         "name": stockName,
                         "url": url,
                         "date": "" if "publishDate" not in data[i] else data[i]['publishDate'],
-                        "type": "eastmoney-stock-report",
+                        "type": type,
                         "createTime": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                         "abstract": abstract,
                         "title": "" if "title" not in data[i] else data[i]['title'],

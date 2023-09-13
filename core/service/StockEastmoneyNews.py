@@ -12,6 +12,7 @@ import requests
 
 
 sys.path.append("..")
+from utils.urlToData import download_page
 from config.common_config import crowBaseUrl
 from config.Logger import logger
 from utils.urlToData import get_text
@@ -32,7 +33,7 @@ htmlcontent = {
 }
 
 
-def eastmoney(code: str, stockName: str, beginTime: str, endTime: str):  # 两个参数分别表示开始读取与结束读取的页码
+def eastmoney(code: str, stockName: str, beginTime: str, endTime: str,beStore:bool=True):  # 两个参数分别表示开始读取与结束读取的页码
     domain = "eastmoney-stock-news"
     param_content = htmlcontent[domain]
     if not param_content:
@@ -66,17 +67,9 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str):  # 两�
             link = link + "&" + key + "=" + urllib.parse.quote(value)
 
         print(f"link:{link}")  # 用于检查
-        crawUrl = f"{crowBaseUrl}&url={urllib.parse.quote(link)}"
-        try:
-            response = requests.get(crawUrl, verify=False, timeout=30)  # 禁止重定向
-            print(response.text)
-        except Exception as e:
-            count += 1
-            logger.info(f"第{count}次请求异常,{e}")
-            continue
-        content = response.text
+        content = download_page(link, beStore)
         if 'result_re' in param_content:
-            content = re.findall(param_content['result_re'], response.text)[0]
+            content = re.findall(param_content['result_re'], content)[0]
         # 读取的是json文件。因此就用json打开啦
         data = json.loads(content)
         # 找到原始页面中数据所在地
@@ -105,7 +98,7 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str):  # 两�
 
             print(f"开始处理第{total}条数据：{data[i]}")
             url = data[i]['url']
-            text, err = get_text(url)
+            text, err = get_text(url,beStore)
             abstract = data[i]['content'].replace('</em>', '').replace('<em>', '').strip()
             if not abstract or len(abstract) == 0:
                 if text and len(text) > 0:
@@ -166,4 +159,4 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str):  # 两�
 
 
 if __name__ == "__main__":
-    eastmoney("300375", "鹏翎股份", "2023-09-01", "2023-09-09")
+    eastmoney("300375", "鹏翎股份", "2023-09-01", "2023-09-09",False)

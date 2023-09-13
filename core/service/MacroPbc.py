@@ -105,7 +105,7 @@ def pbcMacro(beginTime: str, endTime: str, bStore: bool = True):  # 两个参数
     # 异常数据处理
     if bStore:
         if len(errorList) > 0:
-        	MongoDbStore.storeData(errorList, f"aifin_stock_error", 3)
+        	MongoDbStore.storeData(errorList, f"aifin_macro_error", 3)
 
         # 日志入库
         content = f"完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据,异常数据{len(errorList)}条"

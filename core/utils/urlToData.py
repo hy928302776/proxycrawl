@@ -19,6 +19,7 @@ analysis_method = [
          "element": "div",
          "attr": {"class": "article-body"},
      }],
+	 "extract": ["table"],
      "replace": ["\n\n", "  "],
      "temp": "http://caifuhao.eastmoney.com/news/20230828194502076311480"
      },
@@ -28,6 +29,7 @@ analysis_method = [
          "element": "div",
          "attr": {"class": "stockcodec"},
      }],
+	"extract": ["table"],
      "replace": ["\n\n", "  ", '</em>', '<em>'],
      "temp": "http://blog.eastmoney.com/k7529386105985542/blog_1345979348.html"
      },
@@ -36,6 +38,7 @@ analysis_method = [
          "element": "div",
          "attr": {"class": "newsContent"},
      }],
+	 "extract": ["table"],
      "replace": ["\n\n", "  "],
      "temp": "https://data.eastmoney.com/report/info/AP000000000334343.html"
      },
@@ -60,6 +63,7 @@ analysis_method = [
          "element": "div",
          "attr": {"class": "txtinfos"},
      }],
+	 "extract": ["table"],
      "replace": ["\n\n", "  "],
      "temp": "https://finance.eastmoney.com/a/202309052838047556.html"
      },
@@ -200,6 +204,6 @@ def download_page(url: str, useproxy: bool = True, **kwargs):
 
 
 if __name__ == '__main__':
-    # text, err = get_text("http://stock.eastmoney.com/a/202309092842368482.html")
-    test, err = get_text("https://www.cls.cn/detail/1459408", False, headers={'user-agent': 'Mozilla/5.0'})
+    test, err = get_text("http://stock.eastmoney.com/a/202309112843221326.html",False)
+    #test, err = get_text("https://www.cls.cn/detail/1459408", False, headers={'user-agent': 'Mozilla/5.0'})
     print(test)

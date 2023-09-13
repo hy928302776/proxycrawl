@@ -126,7 +126,7 @@ def stats_zxfb(beginTime: str, endTime: str, bStore: bool = True):  # 两个参�
     # 异常数据处理
     if bStore:
         if len(errorList) > 0:
-            MongoDbStore("aifin_stock_error").storeData(errorList, -1).close()
+            MongoDbStore("aifin_macro_error").storeData(errorList, -1).close()
 
         # 日志入库
 
