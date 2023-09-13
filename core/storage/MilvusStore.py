@@ -38,9 +38,10 @@ def storeData(docs: list[dict],collection_name:str,path:str="36.138.93.247:31395
         docList.append(docx)
 
     docs = load_and_split(docList)
-    print("进入存储阶段")
+    print("开始HuggingFaceEmbeddings切分")
     embeddings = HuggingFaceEmbeddings(model_name=embedding_model_dict[EMBEDDING_MODEL],
                                        model_kwargs={'device': EMBEDDING_DEVICE})
+    print("进入存储阶段")
     count = 0
     obj = None
     while True and count < 3:

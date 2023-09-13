@@ -29,7 +29,7 @@ def pre(industry: str):
     err_count = 0
     while True and err_count < 3 and total < count:
         # （2）查询第一批数据
-        results = dbStore.searchData(query, 100)
+        results = dbStore.searchData(query, 10)
         if not results:
             print(f"同步{industry}数据表完成，一共处理{total}条数据")
             break
@@ -68,5 +68,5 @@ if __name__ == '__main__':
         for industry in industryList:
             num += 1
             print("============================")
-            print(f"一共获取到了{len(industry)}个行业，现在处理第{num}个：{industry}")
+            print(f"一共获取到了{len(industryList)}个行业，现在处理第{num}个：{industry}")
             pre(industry['industry_code'])

@@ -23,7 +23,7 @@ if __name__ == '__main__':
     err_count = 0
     while True and err_count < 3 and total < count:
         # （2）查询第一批数据
-        results = dbStore.searchData({"status": {"$lt": status}}, 100)
+        results = dbStore.searchData({"status": {"$lt": status}}, 10)
         if not results:
             print(f"同步宏观数据表完成，一共处理{total}条数据")
             break
