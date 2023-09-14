@@ -28,21 +28,18 @@ class MongoDbStore:
         print(f"写入mongodb【{self.collection_name}】库over")
         return self
 
-    def searchData(self, condation: dict = {}, size: int = 100):
+    def searchData(self, query: dict = {}, size: int = 100):
         """
 
         :param condation: 条件
         :param size: 大小
         :return: 返回结果集
         """
-        return self.collection.find(condation).limit(size)
+        return self.collection.find(query).limit(size)
 
     # db.test.find({xxx...xxx}).sort({"amount":1}).skip(10).limit(10)/
 
-    def countData(self, condation: dict = {}):
-        # 定义查询条件
-        query = condation  # 替换为实际的查询条件
-
+    def countData(self, query: dict = {}):
         # 构建聚合管道
         pipeline = [
             {"$match": query},
@@ -56,6 +53,16 @@ class MongoDbStore:
         if nextObj:
             total_count = nextObj['total']
         return total_count
+
+    def listgroupCount(self, category: str):
+        result = self.collection.aggregate([
+            {"$group": {"_id": f"${category}", "count": {"$sum": 1}}}
+        ])
+        return result
+
+    def deleteBystatus(self,status):
+        result = self.collection.delete_many({"status":status})
+        return result.deleted_count
 
     def close(self):
         # 关闭连接

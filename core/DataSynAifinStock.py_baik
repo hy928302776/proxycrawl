@@ -1,0 +1,74 @@
+# ===========个股数据数据同步==================
+import sys
+
+from pymongo import UpdateOne
+
+from storage import MilvusStore
+from storage.MongoDbStore import MongoDbStore
+
+
+def data_sys_stock():
+    status = 0
+    if len(sys.argv) > 1:
+        status = sys.argv[1]
+
+    # （1）创建mongodb连接
+    dbStore = MongoDbStore("aifin_stock")
+
+    # （2）统计有多少数据,以及每个股票的数量
+    count = dbStore.countData({"status": {"$lt": status}})
+    stock_list = dbStore.listgroupCount("code")
+    print(f"一共有{count}条数据需要处理,各股票数量{stock_list}")
+
+    total = 0  # 统计处理数据总数
+    # （3）循环处理每个股票
+    for stock_info in stock_list:
+        stock = stock_info['_id']
+        pre_count = stock_info['count']  # 每只股票需处理的总个数
+        print(f"开始处理股票{stock}，数量{pre_count}")
+
+        collects = [
+            {"status": {"$lt": status}},
+            {"code": stock}
+        ]
+        query = {"$and": collects}
+
+        pre_totle = 0  # 统计每只股票已处理的数据
+        while pre_totle < pre_count:
+            # （2）查询第一批数据
+            results = dbStore.searchData(query, 10)
+            if not results:
+                break
+
+            # （3）构建批量处理数据
+            milvus_datalist = []
+            # 指定要删除的键
+            keys_to_remove = ["_id", "status"]
+
+            bulk_operations = []
+            # 定义更新操作
+            update = {"$set": {"status": status}}  # 替换为实际的更新操作
+            for document in results:
+                bulk_operations.append(UpdateOne({"_id": document["_id"]}, update))
+                # 使用字典推导式生成新字典
+                milvus_datalist.append({key: value for key, value in document.items() if key not in keys_to_remove})
+
+            print(f"milvus_datalist:{milvus_datalist}")
+            # （4）入矢量库
+            MilvusStore.storeData(milvus_datalist, f"aifin_stock_{stock}")
+            # （5）执行批量更新
+            result = dbStore.collection.bulk_write(bulk_operations)
+            update_count = result.modified_count
+            # 输出更新结果
+            print("更新的文档数量:", update_count)
+            pre_totle += update_count
+            print(f"{stock}一共有{pre_count}条数据需要处理,现在处理了{pre_totle}条数据")
+
+        print(f"同步{stock}数据表完成，一共处理{pre_totle}条数据")
+        total += pre_totle
+    print(f"所有数据处理完成一共{count}条数据，处理了{total}条数据")
+    dbStore.close()
+
+
+if __name__ == '__main__':
+    data_sys_stock()

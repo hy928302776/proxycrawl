@@ -126,7 +126,7 @@ def cls_industry_data(industryCode: str, industryName: str, beginTime: str = Non
         err_count = 0
 
     beginTime_str = datetime.datetime.fromtimestamp(beginTimeStamp).strftime('%Y-%m-%d %H:%M:%S')
-    content = f"完成了从{beginTime_str}到{endTime_str}内的数据，一共处理{total}条数据,有效数据{valid_data_total}条,异常数据{len(errorList)}条"
+    content = f"{industryCode}【{industryName}】完成了从{beginTime_str}到{endTime_str}内的数据，一共处理{total}条数据,有效数据{valid_data_total}条,异常数据{len(errorList)}条"
     print(content)
     # 异常数据处理
     if bStore:

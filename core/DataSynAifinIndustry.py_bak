@@ -3,12 +3,12 @@ import sys
 
 from pymongo import UpdateOne
 
-from config.common_config import typelist
+from storage.MySqlStore import MainDb
 from storage import MilvusStore
 from storage.MongoDbStore import MongoDbStore
 
 
-def pre(type_item: str):
+def pre(industry: str):
     status = 0
     if len(sys.argv) > 1:
         status = sys.argv[1]
@@ -62,9 +62,11 @@ def pre(type_item: str):
 
 
 if __name__ == '__main__':
+    industryList: list = MainDb().batchIndustryInfo()
+    if industryList and len(industryList) > 0:
         num = 0
-        for type_item in typelist:
+        for industry in industryList:
             num += 1
             print("============================")
-            print(f"一共获取到了{len(typelist)}个类型，现在处理第{num}个：{type_item}")
-            pre(type_item)
+            print(f"一共获取到了{len(industryList)}个行业，现在处理第{num}个：{industry}")
+            pre(industry['industry_code'])
