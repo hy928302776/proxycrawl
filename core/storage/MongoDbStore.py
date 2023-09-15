@@ -35,7 +35,7 @@ class MongoDbStore:
         :param size: 大小
         :return: 返回结果集
         """
-        return self.collection.find(query).limit(size)
+        return list(self.collection.find(query).limit(size))
 
     # db.test.find({xxx...xxx}).sort({"amount":1}).skip(10).limit(10)/
 

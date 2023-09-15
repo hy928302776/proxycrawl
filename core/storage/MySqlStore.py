@@ -90,6 +90,7 @@ class MainDb(DbConnect):
 
 class TlDb(DbConnect):
     dbinfo = {
+        #"host": "192.168.6.5",
         "host": "36.138.94.158",
         "user": "root",
         "password": "juw&2155FR345&$",
@@ -115,4 +116,4 @@ class TlDb(DbConnect):
 
 
 if __name__ == '__main__':
-    print(TlDb().listSecurityIdsByStock())
+    print(MainDb().batchStockInfo())

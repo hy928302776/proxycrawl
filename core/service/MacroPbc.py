@@ -10,12 +10,11 @@ import urllib.parse
 import requests
 from bs4 import BeautifulSoup
 
-from utils.urlToData import download_page
 
 sys.path.append("..")
+from utils.urlToData import download_page
 from config.common_config import crowBaseUrl
 from storage import MilvusStore
-from storage.MySqlStore import batchStockInfo
 from storage import MongoDbStore
 from utils.urlToData import get_text
 

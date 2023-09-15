@@ -1,4 +1,5 @@
 # ===================个股公司调研==============================
+import datetime
 import sys
 
 sys.path.append("..")
@@ -16,14 +17,15 @@ def stock_tl_survey(sec_code, beginTime: str, endTime: str, bStore: bool = True)
     # （2）
     total = 0
     startIndex = 0
-    offset = 10
+    offset = 5
     while True:
+        currenttime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         # （1）根据REPORT_TYPE+SEC_CODE获取
-        querysql = "SELECT 'DB' AS source,ea.EVENT_ID AS uniqueId,ea.TICKER_SYMBOL AS code,ea.SEC_SHORT_NAME AS name,ea.PUBLISH_DATE AS date,'tl-stock-survey' AS type,"
-        "CURRENT_TIME AS createTime,SUBSTR(ep.CONTENT,50) AS abstract,CONCAT(ea.SEC_SHORT_NAME,'于',ea.SURVEY_DATE,'在', ep.LOCATION,'的', ep.ACTIVITY_TYPE,'事件') AS title,"
-        "'通联' AS mediaName,ep.CONTENT AS `text`"
-        "FROM equ_is_activity ea INNER JOIN equ_is_participant_qa ep ON ea.EVENT_ID = ep.EVENT_ID"
-        f"WHERE ea.TICKER_SYMBOL = '{sec_code}' AND ea.PUBLISH_DATE BETWEEN '{beginTime}' and '{endTime}' LIMIT {startIndex},{offset}"
+        querysql = "SELECT DISTINCT 'DB' AS source,ea.EVENT_ID AS uniqueId,ea.TICKER_SYMBOL AS code,ea.SEC_SHORT_NAME AS name,ea.PUBLISH_DATE AS date,'tl-stock-survey' AS type,"\
+        f" '{currenttime}' AS createTime,SUBSTR(ep.CONTENT,50) AS abstract,CONCAT(ea.SEC_SHORT_NAME,'于',ea.SURVEY_DATE,'在', ep.LOCATION,'的', ep.ACTIVITY_TYPE,'事件') AS title,"\
+        " '通联' AS mediaName,ep.CONTENT AS `text`"\
+        " FROM equ_is_activity ea INNER JOIN equ_is_participant_qa ep ON ea.EVENT_ID = ep.EVENT_ID"\
+        f" WHERE ea.TICKER_SYMBOL = '{sec_code}' AND ea.PUBLISH_DATE BETWEEN '{beginTime}' and '{endTime}' LIMIT {startIndex},{offset}"\
 
         print(f"开始执行sql:{querysql}")
         query_result = tldb.select(querysql)
@@ -57,8 +59,8 @@ def stock_tl_survey(sec_code, beginTime: str, endTime: str, bStore: bool = True)
 
 
 if __name__ == '__main__':
-    beginTime: str = '2023-09-10'
-    endTime: str = '2023-09-10'
+    beginTime: str = '2023-09-01'
+    endTime: str = '2023-09-16'
     bStore: bool = False
-    sec_code = '002466'
+    sec_code = '000069'
     stock_tl_survey(sec_code, beginTime, endTime, bStore)

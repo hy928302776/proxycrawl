@@ -30,6 +30,7 @@ def load_and_split(docs: list[Document]) -> list[Document]:
 
 
 def storeData(docs: list[dict],collection_name:str,path:str="36.138.93.247:31395"):
+
     docList:list[Document] = []
     for doc in copy.deepcopy(docs):
         text = '' if 'text' not in doc else doc.pop("text")

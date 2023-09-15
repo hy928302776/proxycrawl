@@ -57,7 +57,7 @@ def east_notice(code: str, stockName: str, beginTime: str, endTime: str, beStore
         if parse_param:
             key = parse_param['key']
             value: str = parse_param['value']
-            value = value.replace("$code", code).replace("$pageIndex", str(pageIndex)).replace("$pageSize",
+            value = value.replace("$code", stockName).replace("$pageIndex", str(pageIndex)).replace("$pageSize",
                                                                                                str(pageSize))
             link = link + "&" + key + "=" + urllib.parse.quote(value)
 
