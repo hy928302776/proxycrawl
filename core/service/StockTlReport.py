@@ -59,7 +59,7 @@ def stock_tl_report(sec_code, beginTime: str, endTime: str, bStore: bool = True)
 
 
 if __name__ == '__main__':
-    beginTime: str = '2023-09-10'
+    beginTime: str = '2023-09-01'
     endTime: str = '2023-09-10'
     bStore: bool = False
     sec_code = '002466'

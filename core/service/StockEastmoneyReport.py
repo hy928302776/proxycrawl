@@ -120,4 +120,4 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str, bStore: b
 
 if __name__ == "__main__":
 
-    eastmoney("300375", "宁德时代", None, None)
+    eastmoney("300375", "宁德时代", None, None,False)

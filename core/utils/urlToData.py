@@ -19,7 +19,7 @@ analysis_method = [
          "element": "div",
          "attr": {"class": "article-body"},
      }],
-	 "extract": ["table"],
+     "extract": ["table"],
      "replace": ["\n\n", "  "],
      "temp": "http://caifuhao.eastmoney.com/news/20230828194502076311480"
      },
@@ -29,7 +29,7 @@ analysis_method = [
          "element": "div",
          "attr": {"class": "stockcodec"},
      }],
-	"extract": ["table"],
+     "extract": ["table"],
      "replace": ["\n\n", "  ", '</em>', '<em>'],
      "temp": "http://blog.eastmoney.com/k7529386105985542/blog_1345979348.html"
      },
@@ -38,7 +38,7 @@ analysis_method = [
          "element": "div",
          "attr": {"class": "newsContent"},
      }],
-	 "extract": ["table"],
+     "extract": ["table"],
      "replace": ["\n\n", "  "],
      "temp": "https://data.eastmoney.com/report/info/AP000000000334343.html"
      },
@@ -63,7 +63,7 @@ analysis_method = [
          "element": "div",
          "attr": {"class": "txtinfos"},
      }],
-	 "extract": ["table"],
+     "extract": ["table"],
      "replace": ["\n\n", "  "],
      "temp": "https://finance.eastmoney.com/a/202309052838047556.html"
      },
@@ -174,7 +174,7 @@ def download_page(url: str, useproxy: bool = True, **kwargs):
     crawUrl = f"{crowBaseUrl}&url={urllib.parse.quote(url)}" if useproxy else url
     print(f"crawUrl:{crawUrl}")
     starttime = int(time.time() * 1000)
-    response = requests.get(crawUrl, **kwargs)
+    response = requestUtil(crawUrl, **kwargs)
     print(f"response:{response}，耗时：{int(time.time() * 1000) - starttime}")
     if response.status_code == 200:
         # 以下为乱码异常处理
@@ -203,7 +203,28 @@ def download_page(url: str, useproxy: bool = True, **kwargs):
         #     print("解析response异常")
 
 
+def requestUtil(link, **kwargs):
+    import requests
+    from requests.adapters import HTTPAdapter
+    from urllib3 import Retry
+    # 创建重试策略
+    retries_http = Retry(total=3, backoff_factor=0.5, status_forcelist=[500, 502, 503, 504])
+    retries_https = Retry(total=3, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
+
+    # 创建一个带有重试策略的 Session 对象
+    session = requests.Session()
+
+    # 使用不同的重试策略挂载 http:// 和 https://
+    session.mount('http://', HTTPAdapter(max_retries=retries_http))
+    session.mount('https://', HTTPAdapter(max_retries=retries_https))
+
+    # 发起请求（自动根据协议应用对应的重试策略）
+    response = session.get(link, **kwargs)
+
+    return response
+
+
 if __name__ == '__main__':
-    test, err = get_text("http://stock.eastmoney.com/a/202309112843221326.html",False)
-    #test, err = get_text("https://www.cls.cn/detail/1459408", False, headers={'user-agent': 'Mozilla/5.0'})
+    test, _ = get_text("http://stock.eastmoney.com/a/202309112843221326.html", False)
+    # test, err = get_text("https://www.cls.cn/detail/1459408", False, headers={'user-agent': 'Mozilla/5.0'})
     print(test)
