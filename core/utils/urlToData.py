@@ -98,6 +98,7 @@ analysis_method = [
          "element": "div",
          "attr": {"class": "txtinfos"},
      }],
+	 "extract": ["table"],
      "replace": ["\n\n", "  "],
      "temp": "http://stock.eastmoney.com/a/202309092842368482.html"
      },

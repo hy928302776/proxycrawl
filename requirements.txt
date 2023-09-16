@@ -3,3 +3,5 @@ langchain==0.0.266
 pymysql
 sentence_transformers
 torch~=2.0.0
+chardet
+beautifulsoup4
