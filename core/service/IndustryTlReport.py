@@ -22,7 +22,7 @@ def industry_tl_report(bMilvus: bool, industry_code: str, industry_name: str, be
     while True:
         currenttime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         # （1）根据REPORT_TYPE+SEC_CODE获取
-        querysql = "SELECT 'DB' as source, REPORT_ID as uniqueId,WRITE_DATE as date," \
+        querysql = "SELECT 'DB' as source, REPORT_ID+'' as uniqueId,WRITE_DATE as date," \
                    f"'tl-industry-report' as type,'{currenttime}' as createTime, ABSTRACT as abstract,TITLE as title,'通联' as mediaName," \
                    "(SELECT ABSTRACT_TEXT from rr_abstract  ra WHERE ra.REPORT_ID= rm.REPORT_ID ) as `text`" \
                    f" from rr_main  rm where REPORT_TYPE='行业研究' AND INDUSTRY_L1='{industry_name}' and WRITE_DATE between '{beginTime}' and '{endTime}'" \

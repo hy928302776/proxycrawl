@@ -60,8 +60,8 @@ def data_sys_aifin(monggo_db: str, milvus_db: str, fenku: bool, status: int = 1)
 
             print(f"milvus_datalist:{milvus_datalist}")
             # （4）入矢量库
-            milvus_db_str = f"{milvus_db}_{item}" if fenku else milvus_db
-
+            if fenku:
+                milvus_db_str = f"{milvus_db}_{item}"
             MilvusStore.storeData(milvus_datalist, milvus_db_str)
             # （5）执行批量更新
             result = dbStore.collection.bulk_write(bulk_operations)
