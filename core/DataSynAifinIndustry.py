@@ -1,3 +1,4 @@
+# ===================行业数据同步==============================
 from service.DataSynAifin import data_sys_aifin
 
 if __name__ == '__main__':

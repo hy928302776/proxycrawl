@@ -1,3 +1,4 @@
+# ===================个股异常数据同步==============================
 from storage.MongoDbStore import MongoDbStore
 from service.DataSynAifin import data_sys_aifin
 
