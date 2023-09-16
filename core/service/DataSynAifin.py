@@ -1,14 +1,13 @@
 # ===========个股数据数据同步==================
 import sys
 
-
 sys.path.append("..")
 from pymongo import UpdateOne
 from storage import MilvusStore
 from storage.MongoDbStore import MongoDbStore
 
 
-def data_sys_aifin(monggo_db:str,milvus_db:str,fenku:bool,status:int=1):
+def data_sys_aifin(monggo_db: str, milvus_db: str, fenku: bool, status: int = 1):
     """
 
     :param monggo_db: mongodb库
@@ -23,11 +22,12 @@ def data_sys_aifin(monggo_db:str,milvus_db:str,fenku:bool,status:int=1):
     # （2）统计有多少数据,以及每个item的数量
     count = dbStore.countData({"status": {"$lt": status}})
     item_list = dbStore.listgroupCount("code")
-    print(f"一共有{count}条数据需要处理,各item数量{list(item_list)}")
+    searchList = list(item_list)
+    print(f"一共有{count}条数据需要处理,各item数量{searchList}")
 
     total = 0  # 统计处理数据总数
     # （3）循环处理每个item
-    for item_info in item_list:
+    for item_info in searchList:
         item = item_info['_id']
         pre_count = item_info['count']  # 每只item需处理的总个数
         print(f"开始处理item{item}，数量{pre_count}")
@@ -78,4 +78,4 @@ def data_sys_aifin(monggo_db:str,milvus_db:str,fenku:bool,status:int=1):
 
 
 if __name__ == '__main__':
-    data_sys_aifin("aifin_stock","aifin_stock",True)
+    data_sys_aifin("aifin_stock", "aifin_stock", True)
