@@ -29,7 +29,7 @@ def load_and_split(docs: list[Document]) -> list[Document]:
     return [doc for doc in related_docs if len(doc.page_content.strip()) > 20]
 
 
-def storeData(docs: list[dict],collection_name:str,path:str="36.138.93.247:31395"):
+def storeData(docs: list[dict],collection_name:str,path:str="47.97.218.138:31865"):
 
     docList:list[Document] = []
     for doc in copy.deepcopy(docs):

@@ -1,3 +1,4 @@
+# ===================个股东方财富新闻资讯==============================
 import sys
 
 from storage.MySqlStore import  MainDb

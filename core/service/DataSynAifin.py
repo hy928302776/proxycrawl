@@ -16,7 +16,7 @@ def data_sys_aifin(monggo_db:str,milvus_db:str,fenku:bool):
     :param fenku: 是否分库
     :return:
     """
-    status = 0
+    status = 1
     if len(sys.argv) > 1:
         status = sys.argv[1]
 
