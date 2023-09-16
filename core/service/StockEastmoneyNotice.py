@@ -149,21 +149,21 @@ def east_notice(bMilvus:bool,code: str, stockName: str, beginTime: str, endTime:
         pageIndex += 1
         count = 0
 
-        content = f"{stockName}-{code}完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据,异常数据{len(errorList)}条"
-        print(content)
-        if beStore:
-            # 异常数据处理
-            if len(errorList) > 0:
-                MongoDbStore("aifin_stock_error").storeData(errorList, -1).close()
+    content = f"{stockName}-{code}完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据,异常数据{len(errorList)}条"
+    print(content)
+    if beStore:
+        # 异常数据处理
+        if len(errorList) > 0:
+            MongoDbStore("aifin_stock_error").storeData(errorList, -1).close()
 
-                # 日志入库
+            # 日志入库
 
-            logdata = [{"type": type,
-                        "code": code,
-                        "name": stockName,
-                        "createTime": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                        "content": content}]
-            MongoDbStore("aifin_logs").storeData(logdata, 0).close()
+        logdata = [{"type": type,
+                    "code": code,
+                    "name": stockName,
+                    "createTime": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    "content": content}]
+        MongoDbStore("aifin_logs").storeData(logdata, 0).close()
 
 
 if __name__ == "__main__":

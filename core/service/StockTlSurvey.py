@@ -8,11 +8,13 @@ from storage.MongoDbStore import MongoDbStore
 from storage.MySqlStore import TlDb
 
 
-def stock_tl_survey(bMilvus:bool,sec_code, beginTime: str, endTime: str,bStore:bool=True):
+def stock_tl_survey(bMilvus:bool,sec_code, beginDateStr: str, endDateStr: str,bStore:bool=True):
+    beginDate =  (datetime.date.today() - datetime.timedelta(days=1)) if not beginDateStr else datetime.datetime.strptime(beginDateStr, "%Y-%m-%d").date()
+    endDate =  (datetime.date.today() - datetime.timedelta(days=1)) if not endDateStr else datetime.datetime.strptime(endDateStr, "%Y-%m-%d").date()
     tldb = TlDb()
     # （1）获取符合条件的数据总数
     count_result = tldb.select(
-        f"select count(*) as `count` from equ_is_activity where TICKER_SYMBOL='{sec_code}' and PUBLISH_DATE between '{beginTime}' and '{endTime}'")
+        f"select count(*) as `count` from equ_is_activity where TICKER_SYMBOL='{sec_code}' and PUBLISH_DATE between '{beginDate}' and '{endDate}'")
     print(f"符合条件的数据有{count_result[0]['count']}条")
     # （2）
     total = 0
@@ -25,7 +27,7 @@ def stock_tl_survey(bMilvus:bool,sec_code, beginTime: str, endTime: str,bStore:b
         f" '{currenttime}' AS createTime,SUBSTR(ep.CONTENT,50) AS abstract,CONCAT(ea.SEC_SHORT_NAME,'于',ea.SURVEY_DATE,'在', ep.LOCATION,'的', ep.ACTIVITY_TYPE,'事件') AS title,"\
         " '通联' AS mediaName,ep.CONTENT AS `text`"\
         " FROM equ_is_activity ea INNER JOIN equ_is_participant_qa ep ON ea.EVENT_ID = ep.EVENT_ID"\
-        f" WHERE ea.TICKER_SYMBOL = '{sec_code}' AND ea.PUBLISH_DATE BETWEEN '{beginTime}' and '{endTime}' LIMIT {startIndex},{offset}"\
+        f" WHERE ea.TICKER_SYMBOL = '{sec_code}' AND ea.PUBLISH_DATE BETWEEN '{beginDate}' and '{endDate}' LIMIT {startIndex},{offset}"\
 
         print(f"开始执行sql:{querysql}")
         query_result = tldb.select(querysql)
@@ -61,8 +63,8 @@ def stock_tl_survey(bMilvus:bool,sec_code, beginTime: str, endTime: str,bStore:b
 
 
 if __name__ == '__main__':
-    beginTime: str = '2023-09-01'
-    endTime: str = '2023-09-16'
+    beginDateStr: str = '2023-09-01'
+    endDateStr: str = '2023-09-16'
     bStore: bool = False
     sec_code = '000069'
-    stock_tl_survey(bStore,sec_code, beginTime, endTime, False)
+    stock_tl_survey(bStore,sec_code, beginDateStr, endDateStr, False)

@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
 import pymongo
+from pymongo.errors import BulkWriteError
 
 
 class MongoDbStore:
@@ -23,8 +24,11 @@ class MongoDbStore:
 
         for doc in docList:
             doc.update({'status': status})
+        try:
+            self.collection.insert_many(docList,ordered=False)
+        except BulkWriteError as e:
 
-        self.collection.insert_many(docList)
+            pass  # 忽略重复的错误
         print(f"写入mongodb【{self.collection_name}】库over")
         return self
 

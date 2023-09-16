@@ -41,8 +41,8 @@ class DbConnect():
 
 class MainDb(DbConnect):
     dbinfo = {
-        #"host": "36.138.93.247",
-        "host": "192.168.0.3",
+        "host": "36.138.93.247",
+        #"host": "192.168.0.3",
         "user": "root",
         "password": "QAZwsx123",
         "port": 31652}
@@ -89,8 +89,8 @@ class MainDb(DbConnect):
 
 class TlDb(DbConnect):
     dbinfo = {
-        "host": "192.168.6.5",
-        #"host": "36.138.94.158",
+        #"host": "192.168.6.5",
+        "host": "36.138.94.158",
         "user": "root",
         "password": "juw&2155FR345&$",
         "port": 23456}
