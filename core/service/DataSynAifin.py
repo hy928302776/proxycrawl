@@ -8,7 +8,7 @@ from storage import MilvusStore
 from storage.MongoDbStore import MongoDbStore
 
 
-def data_sys_aifin(monggo_db:str,milvus_db:str,fenku:bool):
+def data_sys_aifin(monggo_db:str,milvus_db:str,fenku:bool,status:int=1):
     """
 
     :param monggo_db: mongodb库
@@ -16,9 +16,6 @@ def data_sys_aifin(monggo_db:str,milvus_db:str,fenku:bool):
     :param fenku: 是否分库
     :return:
     """
-    status = 1
-    if len(sys.argv) > 1:
-        status = sys.argv[1]
 
     # （1）创建mongodb连接
     dbStore = MongoDbStore(monggo_db)
@@ -26,7 +23,7 @@ def data_sys_aifin(monggo_db:str,milvus_db:str,fenku:bool):
     # （2）统计有多少数据,以及每个item的数量
     count = dbStore.countData({"status": {"$lt": status}})
     item_list = dbStore.listgroupCount("code")
-    print(f"一共有{count}条数据需要处理,各item数量{item_list}")
+    print(f"一共有{count}条数据需要处理,各item数量{list(item_list)}")
 
     total = 0  # 统计处理数据总数
     # （3）循环处理每个item
@@ -64,8 +61,8 @@ def data_sys_aifin(monggo_db:str,milvus_db:str,fenku:bool):
             print(f"milvus_datalist:{milvus_datalist}")
             # （4）入矢量库
             if fenku:
-                milvus_db = f"{milvus_db}_{item}"
-            MilvusStore.storeData(milvus_datalist, milvus_db)
+                milvus_db_str = f"{milvus_db}_{item}"
+            MilvusStore.storeData(milvus_datalist, milvus_db_str)
             # （5）执行批量更新
             result = dbStore.collection.bulk_write(bulk_operations)
             update_count = result.modified_count
