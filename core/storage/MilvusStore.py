@@ -15,7 +15,7 @@ embedding_model_dict = {
     "text2vec": "/root/model/text2vec-large-chinese",
     #"m3e-small": "/data/huggingface/moka-ai/m3e-base",
     #"m3e-small": "/root/.crawlab/huggingface/moka-ai/m3e-base",
-    "m3e-base": "/root/.crawlab/huggingface/moka-ai/m3e-base",
+    "m3e-base": "/root/data/huggingface/moka-ai/m3e-base",
     "m3e-local": "/Users/huangying/data/huggingface/moka-ai/m3e-base",
 }
 EMBEDDING_MODEL = "m3e-base"
