@@ -11,7 +11,7 @@ from utils.urlToData import download_page
 from utils.urlToData import get_text
 
 
-def cls_macro_data(industryCode: str, industryName: str, beginTime: str = None, endTime: str = None,
+def cls_macro_data(bMilvus: bool, industryCode: str, industryName: str, beginTime: str = None, endTime: str = None,
                    bStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
 
     # 遍历每一个URL
@@ -103,13 +103,15 @@ def cls_macro_data(industryCode: str, industryName: str, beginTime: str = None, 
             print("\n")
 
         if bStore and len(storageList) > 0:
-            # 存入矢量库
-            status = 0
-            try:
-                MilvusStore.storeData(storageList, f"aifin_macro")
-            except Exception as e:
-                print(f"{endTime_str}以来的{len(data)}条数据， 存入矢量库异常:{e}")
-                status = -1
+            status = -1
+            if bMilvus:
+                # 存入矢量库
+                status = 0
+                try:
+                    MilvusStore.storeData(storageList, f"aifin_macro")
+                except Exception as e:
+                    print(f"{endTime_str}以来的{len(data)}条数据， 存入矢量库异常:{e}")
+                    status = -1
             # 存入mongoDB库
             MongoDbStore("aifin_macro").storeData(storageList, status).close()
 

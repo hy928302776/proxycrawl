@@ -1,6 +1,4 @@
 # -*- coding: UTF-8 -*-
-import json
-
 import pymysql
 
 
@@ -43,7 +41,8 @@ class DbConnect():
 
 class MainDb(DbConnect):
     dbinfo = {
-        "host": "36.138.93.247",
+        #"host": "36.138.93.247",
+        "host": "192.168.0.3",
         "user": "root",
         "password": "QAZwsx123",
         "port": 31652}
@@ -100,11 +99,6 @@ class TlDb(DbConnect):
         super().__init__(self.dbinfo, "sdsg")
 
     def listSecurityIdsByStock(self):
-        # maindbList = MainDb().batchStockInfo()
-        # print(f"有{len(maindbList)}个数据")
-        # if maindbList:
-        #     stocklist:list[str] = [f"'{data['stock_code']}'" for data in maindbList]
-        #     print(f"fdf:{','.join(stocklist)}")
         sql = f"SELECT SECURITY_ID,TICKER_SYMBOL,SEC_SHORT_NAME FROM md_security limit 10"
         print(f"sql:{sql}")
         result = self.select(sql)
@@ -116,4 +110,4 @@ class TlDb(DbConnect):
 
 
 if __name__ == '__main__':
-    print(MainDb().batchStockInfo())
+    print(TlDb().listSecurityIdsByStock())

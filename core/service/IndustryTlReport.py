@@ -1,4 +1,4 @@
-#===================行业通联研报==============================
+# ===================行业通联研报==============================
 import datetime
 import sys
 
@@ -8,7 +8,8 @@ from storage.MongoDbStore import MongoDbStore
 from storage.MySqlStore import TlDb
 
 
-def industry_tl_report(industry_code:str,industry_name:str, beginTime: str, endTime: str, bStore: bool = True):
+def industry_tl_report(bMilvus: bool, industry_code: str, industry_name: str, beginTime: str, endTime: str,
+                       bStore: bool = True):
     tldb = TlDb()
     # （1）获取符合条件的数据总数
     count_result = tldb.select(
@@ -36,12 +37,14 @@ def industry_tl_report(industry_code:str,industry_name:str, beginTime: str, endT
         # （2）入库处理
         print(f"本次【{industry_code}】获取到{len(query_result)}条数据")
         if bStore:
-            status = 0
-            try:
-                MilvusStore.storeData(query_result, f"aifin_industry_{industry_code}")
-            except Exception as e:
-                print(f"{industry_code}的数据，大小为{len(query_result)} 存入矢量库异常,{e}")
-                status = -1
+            status = -1
+            if bMilvus:
+                status = 0
+                try:
+                    MilvusStore.storeData(query_result, f"aifin_industry_{industry_code}")
+                except Exception as e:
+                    print(f"{industry_code}的数据，大小为{len(query_result)} 存入矢量库异常,{e}")
+                    status = -1
             # 存入mongoDB库
             MongoDbStore("aifin_industry").storeData(query_result, status).close()
             print("本次入库完成")
@@ -64,4 +67,4 @@ if __name__ == '__main__':
     bStore: bool = False
     industry_code = '002466'
     industry_name = '行业名称'
-    industry_tl_report(industry_code,industry_name, beginTime, endTime, bStore)
+    industry_tl_report(industry_code, industry_name, beginTime, endTime, bStore)

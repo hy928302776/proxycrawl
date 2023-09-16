@@ -9,8 +9,6 @@ import urllib.parse
 
 import requests
 
-
-
 sys.path.append("..")
 from utils.urlToData import download_page
 from utils.urlToData import get_text
@@ -31,7 +29,8 @@ htmlcontent = {
 }
 
 
-def eastmoney(code: str, stockName: str, beginTime: str, endTime: str,beStore:bool=True):  # 两个参数分别表示开始读取与结束读取的页码
+def eastmoney(bMilvus: bool, code: str, stockName: str, beginTime: str, endTime: str,
+              beStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
     domain = "eastmoney-stock-news"
     param_content = htmlcontent[domain]
     if not param_content:
@@ -96,7 +95,7 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str,beStore:bo
 
             print(f"开始处理第{total}条数据：{data[i]}")
             url = data[i]['url']
-            text, err = get_text(url,beStore)
+            text, err = get_text(url, beStore)
             abstract = data[i]['content'].replace('</em>', '').replace('<em>', '').strip()
             if not abstract or len(abstract) == 0:
                 if text and len(text) > 0:
@@ -126,13 +125,15 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str,beStore:bo
             print("\n")
 
         if len(storageList) > 0:
-            # 存入矢量库
-            status = 0
-            try:
-                MilvusStore.storeData(storageList, f"aifin_stock_{code}")
-            except Exception as e:
-                print(f"第{pageIndex}页的数据，大小为{len(data)} 存入矢量库异常,{e}")
-                status = -1
+            status = -1
+            if bMilvus:
+                # 存入矢量库
+                status = 0
+                try:
+                    MilvusStore.storeData(storageList, f"aifin_stock_{code}")
+                except Exception as e:
+                    print(f"第{pageIndex}页的数据，大小为{len(data)} 存入矢量库异常,{e}")
+                    status = -1
             # 存入mongoDB库
             MongoDbStore("aifin_stock").storeData(storageList, status).close()
 
@@ -157,4 +158,4 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str,beStore:bo
 
 
 if __name__ == "__main__":
-    eastmoney("300375", "鹏翎股份", "2023-09-01", "2023-09-09",False)
+    eastmoney(False,"300375", "鹏翎股份", "2023-09-01", "2023-09-09", False)

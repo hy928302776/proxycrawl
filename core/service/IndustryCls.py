@@ -1,4 +1,4 @@
-#=============财联社行业数据==============
+# =============财联社行业数据==============
 
 import datetime
 import json
@@ -7,8 +7,6 @@ import urllib.parse
 import time
 import requests
 
-
-
 sys.path.append("..")
 from storage import MilvusStore
 from storage.MongoDbStore import MongoDbStore
@@ -16,8 +14,8 @@ from utils.urlToData import download_page
 from utils.urlToData import get_text
 
 
-def cls_industry_data(industryCode: str, industryName: str, beginTime: str = None, endTime: str = None,
-                      bStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
+def cls_industry_data(bMilvus: bool, industryCode: str, industryName: str, beginTime: str = None, endTime: str = None,
+                      bStore=True):  # 两个参数分别表示开始读取与结束读取的页码
 
     # 遍历每一个URL
     type = "cls_industry"  # 此次查询类型
@@ -44,7 +42,7 @@ def cls_industry_data(industryCode: str, industryName: str, beginTime: str = Non
         # crawUrl = f"{crowBaseUrl}&url={urllib.parse.quote(link)}"
         # （4）获取请求列表数据
         try:
-            content = download_page(link, bStore, headers={'user-agent': 'Mozilla/5.0'})
+            content = download_page(link, crawbaseflag, headers={'user-agent': 'Mozilla/5.0'})
             # response = requests.get(crawUrl, verify=False, timeout=30)  # 禁止重定向
         except:
             err_count += 1
@@ -76,7 +74,7 @@ def cls_industry_data(industryCode: str, industryName: str, beginTime: str = Non
 
             # （7）获取字段数据数据
             url = f"https://www.cls.cn/detail/{element_data['article_id']}"
-            text, err = get_text(url, bStore, headers={'user-agent': 'Mozilla/5.0'})
+            text, err = get_text(url, crawbaseflag, headers={'user-agent': 'Mozilla/5.0'})
             abstract = element_data['article_brief']
             if (abstract is None or len(abstract) == 0) and text is not None and len(text) > 0:
                 abstract = text[0:100]
@@ -111,12 +109,14 @@ def cls_industry_data(industryCode: str, industryName: str, beginTime: str = Non
 
         if bStore and len(storageList) > 0:
             # 存入矢量库
-            status = 0
-            try:
-                MilvusStore.storeData(storageList, f"aifin_industry_{industryCode}")
-            except Exception as e:
-                print(f"{endTime_str}以来的{len(data)}条数据， 存入矢量库异常:{e}")
-                status = -1
+            status = -1
+            if bMilvus:
+                status = 0
+                try:
+                    MilvusStore.storeData(storageList, f"aifin_industry_{industryCode}")
+                except Exception as e:
+                    print(f"{endTime_str}以来的{len(data)}条数据， 存入矢量库异常:{e}")
+                    status = -1
             # 存入mongoDB库
             MongoDbStore("aifin_industry").storeData(storageList, status).close()
 
@@ -146,4 +146,6 @@ if __name__ == "__main__":
     industryName = '半导体'
     beginTime = '2023-09-10 00:00:00'
     endTime = '2023-09-11 00:00:00'
-    cls_industry_data(industryCode, industryName, beginTime, endTime, False)
+    bMilvus = True
+    bStore = True
+    cls_industry_data(bMilvus, industryCode, industryName, beginTime, endTime, bStore)

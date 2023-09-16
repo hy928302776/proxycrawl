@@ -27,7 +27,7 @@ htmlcontent = {
 }
 
 
-def east_notice(code: str, stockName: str, beginTime: str, endTime: str, beStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
+def east_notice(bMilvus:bool,code: str, stockName: str, beginTime: str, endTime: str, beStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
     type = "eastmoney-stock-notice"
     param_content = htmlcontent[type]
     if not param_content:
@@ -62,14 +62,6 @@ def east_notice(code: str, stockName: str, beginTime: str, endTime: str, beStore
             link = link + "&" + key + "=" + urllib.parse.quote(value)
 
         print(f"link:{link}")  # 用于检查
-        # crawUrl = f"{crowBaseUrl}&url={urllib.parse.quote(link)}"
-        # try:
-        #     response = requests.get(link, verify=False, timeout=30)  # 禁止重定向
-        #     print(response.text)
-        # except Exception as e:
-        #     count += 1
-        #     logger.info(f"第{count}次请求异常,{e}")
-        #     continue
         content = download_page(link, beStore)
         if 'result_re' in param_content:
             content = re.findall(param_content['result_re'], content)[0]
@@ -140,13 +132,15 @@ def east_notice(code: str, stockName: str, beginTime: str, endTime: str, beStore
             print("\n")
 
         if beStore and len(storageList) > 0:
-            # 存入矢量库
-            status = 0
-            try:
-                MilvusStore.storeData(storageList, f"aifin_stock_{code}")
-            except Exception as e:
-                print(f"第{pageIndex}页的数据，大小为{len(data)} 存入矢量库异常,{e}")
-                status = -1
+            status = -1
+            if bMilvus:
+                # 存入矢量库
+                status = 0
+                try:
+                    MilvusStore.storeData(storageList, f"aifin_stock_{code}")
+                except Exception as e:
+                    print(f"第{pageIndex}页的数据，大小为{len(data)} 存入矢量库异常,{e}")
+                    status = -1
             # 存入mongoDB库
             MongoDbStore("aifin_stock").storeData(storageList, status).close()
 

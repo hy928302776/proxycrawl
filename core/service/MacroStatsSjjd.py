@@ -11,7 +11,7 @@ from utils.urlToData import download_page, get_text
 from storage import MilvusStore
 from storage.MongoDbStore import MongoDbStore
 
-def stats_sjjd(beginTime: str, endTime: str, bStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
+def stats_sjjd(bMilvus:bool,beginTime: str, endTime: str, bStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
 
     # 遍历每一个URL
     type = "stats_sjjd"  # 此次查询类型
@@ -106,13 +106,15 @@ def stats_sjjd(beginTime: str, endTime: str, bStore: bool = True):  # 两个参�
 
 
         if bStore and len(storageList) > 0:
-            # 存入矢量库
-            status = 0
-            try:
-                MilvusStore.storeData(storageList, "aifin_macro")
-            except Exception as e:
-                print(f"第{pageIndex}页的数据，大小为{len(list_data)} 存入矢量库异常:{e}")
-                status = -1
+            status = -1
+            if bMilvus:
+                # 存入矢量库
+                status = 0
+                try:
+                    MilvusStore.storeData(storageList, "aifin_macro")
+                except Exception as e:
+                    print(f"第{pageIndex}页的数据，大小为{len(list_data)} 存入矢量库异常:{e}")
+                    status = -1
             # 存入mongoDB库
             MongoDbStore("aifin_macro").storeData(storageList, status).close()
 

@@ -7,6 +7,7 @@ if __name__ == '__main__':
 
 import sys
 import uuid
+
 sys.path.append("..")
 import datetime
 import json
@@ -15,7 +16,7 @@ from storage import MilvusStore
 from storage.MongoDbStore import MongoDbStore
 
 
-def kuaixun_macro(beginTime: str, endTime: str, bStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
+def kuaixun_macro(bMilvus: bool, beginTime: str, endTime: str, bStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
 
     # 遍历每一个URL
     type = "kuaixun"  # 此次查询类型
@@ -106,13 +107,15 @@ def kuaixun_macro(beginTime: str, endTime: str, bStore: bool = True):  # 两个�
             print("\n")
 
         if bStore and len(storageList) > 0:
-            # 存入矢量库
-            status = 0
-            try:
-                MilvusStore.storeData(storageList, "aifin_macro")
-            except Exception as e:
-                print(f"第{pageIndex}页的数据，大小为{len(list_data)} 存入矢量库异常:{e}")
-                status = -1
+            status = -1
+            if bMilvus:
+                # 存入矢量库
+                status = 0
+                try:
+                    MilvusStore.storeData(storageList, "aifin_macro")
+                except Exception as e:
+                    print(f"第{pageIndex}页的数据，大小为{len(list_data)} 存入矢量库异常:{e}")
+                    status = -1
             # 存入mongoDB库
             MongoDbStore("aifin_macro").storeData(storageList, status).close()
 

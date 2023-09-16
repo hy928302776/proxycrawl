@@ -8,7 +8,7 @@ from storage.MongoDbStore import MongoDbStore
 from storage.MySqlStore import TlDb
 
 
-def stock_tl_report(sec_code, beginTime: str, endTime: str, bStore: bool = True):
+def stock_tl_report(bMilvus:bool,sec_code:str, beginTime: str, endTime: str, bStore: bool = True):
     tldb = TlDb()
     # （1）获取符合条件的数据总数
     count_result = tldb.select(
@@ -36,12 +36,14 @@ def stock_tl_report(sec_code, beginTime: str, endTime: str, bStore: bool = True)
         # （2）入库处理
         print(f"本次【{sec_code}】获取到{len(query_result)}条数据")
         if bStore:
-            status = 0
-            try:
-                MilvusStore.storeData(query_result, f"aifin_stock_{sec_code}")
-            except Exception as e:
-                print(f"{sec_code}的数据，大小为{len(query_result)} 存入矢量库异常,{e}")
-                status = -1
+            status = -1
+            if bMilvus:
+                status = 0
+                try:
+                    MilvusStore.storeData(query_result, f"aifin_stock_{sec_code}")
+                except Exception as e:
+                    print(f"{sec_code}的数据，大小为{len(query_result)} 存入矢量库异常,{e}")
+                    status = -1
             # 存入mongoDB库
             MongoDbStore("aifin_stock").storeData(query_result, status).close()
             print("本次入库完成")
