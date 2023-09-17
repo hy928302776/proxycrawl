@@ -28,7 +28,7 @@ def stock_tl_survey(bMilvus:bool,sec_code, beginDateStr: str, endDateStr: str,bS
         f" '{currenttime}' AS createTime,SUBSTR(ep.CONTENT,50) AS abstract,CONCAT(ea.SEC_SHORT_NAME,'于',ea.SURVEY_DATE,'在', ep.LOCATION,'的', ep.ACTIVITY_TYPE,'事件') AS title,"\
         " '通联' AS mediaName,ep.CONTENT AS `text`"\
         " FROM equ_is_activity ea INNER JOIN equ_is_participant_qa ep ON ea.EVENT_ID = ep.EVENT_ID"\
-        f" WHERE ea.TICKER_SYMBOL = '{sec_code}' AND ea.PUBLISH_DATE BETWEEN CONVERT('{beginDateStr}',DATE) and CONVERT('{endDateStr}',DATE) LIMIT {startIndex},{offset}"\
+        f" WHERE ea.TICKER_SYMBOL = '{sec_code}' AND ep.CONTENT IS NOT NULL AND ea.PUBLISH_DATE BETWEEN CONVERT('{beginDateStr}',DATE) and CONVERT('{endDateStr}',DATE) LIMIT {startIndex},{offset}"\
 
         print(f"开始执行sql:{querysql}")
         query_result = tldb.select(querysql)
