@@ -18,7 +18,7 @@ embedding_model_dict = {
     "m3e-base": "/root/data/huggingface/moka-ai/m3e-base",
     "m3e-local": "/Users/huangying/data/huggingface/moka-ai/m3e-base",
 }
-EMBEDDING_MODEL = "m3e-local"
+EMBEDDING_MODEL = "m3e-base"
 EMBEDDING_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 
 
