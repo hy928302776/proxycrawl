@@ -1,4 +1,4 @@
-#===================个股通联研报==============================
+# ===================个股通联研报==============================
 import datetime
 import sys
 
@@ -8,15 +8,14 @@ from storage.MongoDbStore import MongoDbStore
 from storage.MySqlStore import TlDb
 
 
-def stock_tl_report(bMilvus:bool,sec_code:str, beginDateStr: str, endDateStr: str, bStore: bool = True):
-
+def stock_tl_report(bMilvus: bool, sec_code: str, beginDateStr: str, endDateStr: str, bStore: bool = True):
     beginDateStr = (datetime.date.today() - datetime.timedelta(days=1)).strftime(
         "%Y-%m-%d") if not beginDateStr else beginDateStr
     endDateStr = (datetime.date.today() - datetime.timedelta(days=1)).strftime(
         "%Y-%m-%d") if not endDateStr else endDateStr
 
     tldb = TlDb()
-    #（1）获取符合条件的数据总数
+    # （1）获取符合条件的数据总数
     count_result = tldb.select(
         f"select count(*) as `count` from rr_main where REPORT_TYPE='公司研究' AND SEC_CODE='{sec_code}' and WRITE_DATE between CONVERT('{beginDateStr}',DATE) and CONVERT('{endDateStr}',DATE)")
     print(f"符合条件的数据有{count_result[0]['count']}条")
@@ -27,10 +26,18 @@ def stock_tl_report(bMilvus:bool,sec_code:str, beginDateStr: str, endDateStr: st
     while True:
         currenttime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         # （1）根据REPORT_TYPE+SEC_CODE获取
-        querysql = "SELECT 'DB' as source, REPORT_ID as uniqueId,SEC_CODE as code,SEC_NAME as name,CAST(WRITE_DATE AS CHAR) AS `date`,'' as url," \
-                   f"'tl-stock-report' as type,'{currenttime}' as createTime, ABSTRACT as abstract,TITLE as title,'通联' as mediaName," \
-                   "(SELECT ABSTRACT_TEXT from rr_abstract  ra WHERE ra.REPORT_ID= rm.REPORT_ID ) as `text`" \
-                   f" from rr_main  rm where REPORT_TYPE='公司研究' AND SEC_CODE='{sec_code}' and WRITE_DATE between CONVERT('{beginDateStr}',DATE) and CONVERT('{endDateStr}',DATE)" \
+        querysql2 = "SELECT 'DB' as source, REPORT_ID as uniqueId,SEC_CODE as code,SEC_NAME as name,CAST(WRITE_DATE AS CHAR) AS `date`,'' as url," \
+                    f"'tl-stock-report' as type,'{currenttime}' as createTime, ABSTRACT as abstract,TITLE as title,'通联' as mediaName," \
+                    "(SELECT ABSTRACT_TEXT from rr_abstract  ra WHERE ra.REPORT_ID= rm.REPORT_ID ) as `text`" \
+                    f" from rr_main  rm where REPORT_TYPE='公司研究' AND SEC_CODE='{sec_code}' and WRITE_DATE between CONVERT('{beginDateStr}',DATE) and CONVERT('{endDateStr}',DATE)" \
+                    f" LIMIT {startIndex},{offset}"
+
+        querysql = "SELECT 'DB' AS source, rm.REPORT_ID AS uniqueId,rm.SEC_CODE AS code,rm.SEC_NAME AS name ,CAST( rm.WRITE_DATE AS CHAR ) AS `date`,'' as url," \
+                   f" 'tl-stock-report' as type,'{currenttime}' as createTime, rm.ABSTRACT as abstract,rm.TITLE as title," \
+                   "'通联' AS mediaName,ra.ABSTRACT_TEXT AS `text`" \
+                   " FROM rr_main rm INNER JOIN rr_abstract ra ON ra.REPORT_ID = rm.REPORT_ID" \
+                   f" WHERE rm.REPORT_TYPE = '公司研究' AND rm.SEC_CODE = '{sec_code}' AND ra.ABSTRACT_TEXT IS NOT NULL" \
+                   f" AND rm.WRITE_DATE between CONVERT('{beginDateStr}',DATE) and CONVERT('{endDateStr}',DATE)" \
                    f" LIMIT {startIndex},{offset}"
 
         print(f"开始执行sql:{querysql}")
@@ -72,4 +79,4 @@ if __name__ == '__main__':
     bStore: bool = False
     bMilvus: bool = False
     sec_code = '300750'
-    stock_tl_report(bMilvus,sec_code, beginTime, endTime, bStore)
+    stock_tl_report(bMilvus, sec_code, beginTime, endTime, bStore)
