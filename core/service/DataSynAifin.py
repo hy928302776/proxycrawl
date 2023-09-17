@@ -21,7 +21,7 @@ def data_sys_aifin(monggo_db: str, milvus_db: str, fenku: bool, status: int = 1)
 
     # （2）统计有多少数据,以及每个item的数量
     count = dbStore.countData({"status": {"$lt": status}})
-    item_list = dbStore.listgroupCount("code")
+    item_list = dbStore.listgroupCount({"status": {"$lt": status}},"code")
     searchList = list(item_list)
     print(f"一共有{count}条数据需要处理,各item数量{searchList}")
 
@@ -78,4 +78,4 @@ def data_sys_aifin(monggo_db: str, milvus_db: str, fenku: bool, status: int = 1)
 
 
 if __name__ == '__main__':
-    data_sys_aifin("aifin_stock", "aifin_stock", True)
+    data_sys_aifin("aifin_stock", "aifin_stock", True,2)

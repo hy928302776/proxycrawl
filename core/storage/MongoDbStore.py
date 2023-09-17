@@ -58,8 +58,9 @@ class MongoDbStore:
             total_count = nextObj['total']
         return total_count
 
-    def listgroupCount(self, category: str):
+    def listgroupCount(self,filter_condition:dict, category: str):
         result = self.collection.aggregate([
+            {"$match": filter_condition},
             {"$group": {"_id": f"${category}", "count": {"$sum": 1}}}
         ])
         return result
