@@ -24,8 +24,8 @@ def stock_tl_survey(bMilvus:bool,sec_code, beginDateStr: str, endDateStr: str,bS
     while True:
         currenttime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         # （1）根据REPORT_TYPE+SEC_CODE获取
-        querysql = "SELECT DISTINCT 'DB' AS source,CAST(ea.EVENT_ID AS CHAR)  AS uniqueId,ea.TICKER_SYMBOL AS code,ea.SEC_SHORT_NAME AS name,CAST(ea.PUBLISH_DATE AS CHAR) AS `date`,'tl-stock-survey' AS type,'' as url,"\
-        f" '{currenttime}' AS createTime,SUBSTR(ep.CONTENT,50) AS abstract,CONCAT(IFNULL(ea.SEC_SHORT_NAME,''),'于',IFNULL(ea.SURVEY_DATE,''),'在', IFNULL(ep.LOCATION,''),'的', IFNULL(ep.ACTIVITY_TYPE,''),'事件') AS title,"\
+        querysql = "SELECT DISTINCT 'DB' AS source,IFNULL(CAST(ea.EVENT_ID AS CHAR),'')  AS uniqueId,IFNULL(ea.TICKER_SYMBOL,'') AS code,IFNULL(ea.SEC_SHORT_NAME,'') AS name,IFNULL(CAST(ea.PUBLISH_DATE AS CHAR),'') AS `date`,'tl-stock-survey' AS type,'' as url,"\
+        f" '{currenttime}' AS createTime,SUBSTR(IFNULL(ep.CONTENT,''),50) AS abstract,CONCAT(IFNULL(ea.SEC_SHORT_NAME,''),'于',IFNULL(ea.SURVEY_DATE,''),'在', IFNULL(ep.LOCATION,''),'的', IFNULL(ep.ACTIVITY_TYPE,''),'事件') AS title,"\
         " '通联' AS mediaName,ep.CONTENT AS `text`"\
         " FROM equ_is_activity ea INNER JOIN equ_is_participant_qa ep ON ea.EVENT_ID = ep.EVENT_ID"\
         f" WHERE ea.TICKER_SYMBOL = '{sec_code}' AND ep.CONTENT IS NOT NULL AND ea.PUBLISH_DATE BETWEEN CONVERT('{beginDateStr}',DATE) and CONVERT('{endDateStr}',DATE) LIMIT {startIndex},{offset}"\

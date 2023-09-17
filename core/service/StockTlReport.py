@@ -27,8 +27,8 @@ def stock_tl_report(bMilvus: bool, sec_code: str, beginDateStr: str, endDateStr:
         currenttime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         # （1）根据REPORT_TYPE+SEC_CODE获取
 
-        querysql = "SELECT 'DB' AS source, CAST(rm.REPORT_ID AS CHAR) AS uniqueId,rm.SEC_CODE AS code,rm.SEC_NAME AS name ,CAST( rm.WRITE_DATE AS CHAR ) AS `date`,'' as url," \
-                   f" 'tl-stock-report' as type,'{currenttime}' as createTime, rm.ABSTRACT as abstract,rm.TITLE as title," \
+        querysql = "SELECT 'DB' AS source, IFNULL(CAST(rm.REPORT_ID AS CHAR),'') AS uniqueId,IFNULL(rm.SEC_CODE,'') AS code,IFNULL(rm.SEC_NAME,'') AS name ,IFNULL(CAST( rm.WRITE_DATE AS CHAR ),'') AS `date`,'' as url," \
+                   f" 'tl-stock-report' as type,'{currenttime}' as createTime, IFNULL(rm.ABSTRACT,'') as abstract,IFNULL(rm.TITLE,'') as title," \
                    "'通联' AS mediaName,ra.ABSTRACT_TEXT AS `text`" \
                    " FROM rr_main rm INNER JOIN rr_abstract ra ON ra.REPORT_ID = rm.REPORT_ID" \
                    f" WHERE rm.REPORT_TYPE = '公司研究' AND rm.SEC_CODE = '{sec_code}' AND ra.ABSTRACT_TEXT IS NOT NULL" \
