@@ -32,7 +32,7 @@ def stock_tl_report(bMilvus: bool, sec_code: str, beginDateStr: str, endDateStr:
                     f" from rr_main  rm where REPORT_TYPE='公司研究' AND SEC_CODE='{sec_code}' and WRITE_DATE between CONVERT('{beginDateStr}',DATE) and CONVERT('{endDateStr}',DATE)" \
                     f" LIMIT {startIndex},{offset}"
 
-        querysql = "SELECT 'DB' AS source, rm.REPORT_ID AS uniqueId,rm.SEC_CODE AS code,rm.SEC_NAME AS name ,CAST( rm.WRITE_DATE AS CHAR ) AS `date`,'' as url," \
+        querysql = "SELECT 'DB' AS source, rm.REPORT_ID+'' AS uniqueId,rm.SEC_CODE AS code,rm.SEC_NAME AS name ,CAST( rm.WRITE_DATE AS CHAR ) AS `date`,'' as url," \
                    f" 'tl-stock-report' as type,'{currenttime}' as createTime, rm.ABSTRACT as abstract,rm.TITLE as title," \
                    "'通联' AS mediaName,ra.ABSTRACT_TEXT AS `text`" \
                    " FROM rr_main rm INNER JOIN rr_abstract ra ON ra.REPORT_ID = rm.REPORT_ID" \
