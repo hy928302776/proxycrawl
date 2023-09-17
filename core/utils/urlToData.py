@@ -98,7 +98,7 @@ analysis_method = [
          "element": "div",
          "attr": {"class": "txtinfos"},
      }],
-	 "extract": ["table"],
+     "extract": ["table"],
      "replace": ["\n\n", "  "],
      "temp": "http://stock.eastmoney.com/a/202309092842368482.html"
      },
@@ -209,8 +209,8 @@ def requestUtil(link, **kwargs):
     from requests.adapters import HTTPAdapter
     from urllib3 import Retry
     # 创建重试策略
-    retries_http = Retry(total=3, backoff_factor=0.5, status_forcelist=[500, 502, 503, 504])
-    retries_https = Retry(total=3, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
+    retries_http = Retry(total=3, backoff_factor=0.5, status_forcelist=[500, 502, 503, 504, 520])
+    retries_https = Retry(total=3, backoff_factor=1, status_forcelist=[500, 502, 503, 504, 520])
 
     # 创建一个带有重试策略的 Session 对象
     session = requests.Session()
@@ -226,6 +226,8 @@ def requestUtil(link, **kwargs):
 
 
 if __name__ == '__main__':
-    test, _ = get_text("http://stock.eastmoney.com/a/202309112843221326.html", False)
+    test = download_page(
+        "https://np-cnotice-stock.eastmoney.com/api/content/ann?art_code=AN202309071597979547&client_source=web&page_index=1&_=1694897075027",
+        False)
     # test, err = get_text("https://www.cls.cn/detail/1459408", False, headers={'user-agent': 'Mozilla/5.0'})
     print(test)
