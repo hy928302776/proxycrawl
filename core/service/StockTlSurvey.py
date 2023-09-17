@@ -24,7 +24,7 @@ def stock_tl_survey(bMilvus:bool,sec_code, beginDateStr: str, endDateStr: str,bS
     while True:
         currenttime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         # （1）根据REPORT_TYPE+SEC_CODE获取
-        querysql = "SELECT DISTINCT 'DB' AS source,ea.EVENT_ID AS uniqueId,ea.TICKER_SYMBOL AS code,ea.SEC_SHORT_NAME AS name,CAST(ea.PUBLISH_DATE AS CHAR) AS `date`,'tl-stock-survey' AS type,"\
+        querysql = "SELECT DISTINCT 'DB' AS source,ea.EVENT_ID AS uniqueId,ea.TICKER_SYMBOL AS code,ea.SEC_SHORT_NAME AS name,CAST(ea.PUBLISH_DATE AS CHAR) AS `date`,'tl-stock-survey' AS type,'' as url"\
         f" '{currenttime}' AS createTime,SUBSTR(ep.CONTENT,50) AS abstract,CONCAT(ea.SEC_SHORT_NAME,'于',ea.SURVEY_DATE,'在', ep.LOCATION,'的', ep.ACTIVITY_TYPE,'事件') AS title,"\
         " '通联' AS mediaName,ep.CONTENT AS `text`"\
         " FROM equ_is_activity ea INNER JOIN equ_is_participant_qa ep ON ea.EVENT_ID = ep.EVENT_ID"\

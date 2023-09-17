@@ -27,7 +27,7 @@ def stock_tl_report(bMilvus:bool,sec_code:str, beginDateStr: str, endDateStr: st
     while True:
         currenttime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         # （1）根据REPORT_TYPE+SEC_CODE获取
-        querysql = "SELECT 'DB' as source, REPORT_ID as uniqueId,SEC_CODE as code,SEC_NAME as name,CAST(WRITE_DATE AS CHAR) AS `date`," \
+        querysql = "SELECT 'DB' as source, REPORT_ID as uniqueId,SEC_CODE as code,SEC_NAME as name,CAST(WRITE_DATE AS CHAR) AS `date`,'' as url," \
                    f"'tl-stock-report' as type,'{currenttime}' as createTime, ABSTRACT as abstract,TITLE as title,'通联' as mediaName," \
                    "(SELECT ABSTRACT_TEXT from rr_abstract  ra WHERE ra.REPORT_ID= rm.REPORT_ID ) as `text`" \
                    f" from rr_main  rm where REPORT_TYPE='公司研究' AND SEC_CODE='{sec_code}' and WRITE_DATE between CONVERT('{beginDateStr}',DATE) and CONVERT('{endDateStr}',DATE)" \
