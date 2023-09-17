@@ -9,16 +9,16 @@ from storage.MySqlStore import TlDb
 
 
 def stock_tl_report(bMilvus:bool,sec_code:str, beginDateStr: str, endDateStr: str, bStore: bool = True):
-    beginDate = (
-                datetime.date.today() - datetime.timedelta(days=1)) if not beginDateStr else datetime.datetime.strptime(
-        beginDateStr, "%Y-%m-%d").date()
-    endDate = (datetime.date.today() - datetime.timedelta(days=1)) if not endDateStr else datetime.datetime.strptime(
-        endDateStr, "%Y-%m-%d").date()
+
+    beginDateStr = (datetime.date.today() - datetime.timedelta(days=1)).strftime(
+        "%Y-%m-%d") if not beginDateStr else beginDateStr
+    endDateStr = (datetime.date.today() - datetime.timedelta(days=1)).strftime(
+        "%Y-%m-%d") if not endDateStr else endDateStr
 
     tldb = TlDb()
-    # （1）获取符合条件的数据总数
+    #（1）获取符合条件的数据总数
     count_result = tldb.select(
-        f"select count(*) as `count` from rr_main where REPORT_TYPE='公司研究' AND SEC_CODE='{sec_code}' and WRITE_DATE between {beginDate} and {endDate}")
+        f"select count(*) as `count` from rr_main where REPORT_TYPE='公司研究' AND SEC_CODE='{sec_code}' and WRITE_DATE between CONVERT('{beginDateStr}',DATE) and CONVERT('{endDateStr}',DATE)")
     print(f"符合条件的数据有{count_result[0]['count']}条")
     # （2）
     total = 0
@@ -30,7 +30,7 @@ def stock_tl_report(bMilvus:bool,sec_code:str, beginDateStr: str, endDateStr: st
         querysql = "SELECT 'DB' as source, REPORT_ID as uniqueId,SEC_CODE as code,SEC_NAME as name,WRITE_DATE as date," \
                    f"'tl-stock-report' as type,'{currenttime}' as createTime, ABSTRACT as abstract,TITLE as title,'通联' as mediaName," \
                    "(SELECT ABSTRACT_TEXT from rr_abstract  ra WHERE ra.REPORT_ID= rm.REPORT_ID ) as `text`" \
-                   f" from rr_main  rm where REPORT_TYPE='公司研究' AND SEC_CODE='{sec_code}' and WRITE_DATE between {beginDate} and {endDate}" \
+                   f" from rr_main  rm where REPORT_TYPE='公司研究' AND SEC_CODE='{sec_code}' and WRITE_DATE between CONVERT('{beginDateStr}',DATE) and CONVERT('{endDateStr}',DATE)" \
                    f" LIMIT {startIndex},{offset}"
 
         print(f"开始执行sql:{querysql}")
@@ -67,8 +67,9 @@ def stock_tl_report(bMilvus:bool,sec_code:str, beginDateStr: str, endDateStr: st
 
 
 if __name__ == '__main__':
-    beginTime: str = '2023-09-01'
+    beginTime: str = '2022-09-01'
     endTime: str = '2023-09-10'
     bStore: bool = False
-    sec_code = '002466'
-    stock_tl_report(sec_code, beginTime, endTime, bStore)
+    bMilvus: bool = False
+    sec_code = '300750'
+    stock_tl_report(bMilvus,sec_code, beginTime, endTime, bStore)
