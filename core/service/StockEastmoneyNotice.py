@@ -46,7 +46,7 @@ def east_notice(bMilvus:bool,code: str, stockName: str,num:int, beginTime: str, 
         "%Y-%m-%d") if not beginTime else beginTime
     endTime = (datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d") if not endTime else endTime
     while flag and count < 5:
-        print(f"开始获取第{pageIndex}页数据")
+        print(f"开始获取第{num}个股票{code}的第{pageIndex}页数据")
         domainurl: str = param_content['domainurl']
         st = int(round(time.time() * 1000))
         domainurl = domainurl.replace("$code", code).replace("$pageIndex", str(pageIndex)).replace("$pageSize",
@@ -164,6 +164,8 @@ def east_notice(bMilvus:bool,code: str, stockName: str,num:int, beginTime: str, 
                     "createTime": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                     "content": content}]
         MongoDbStore("aifin_logs").storeData(logdata, 0).close()
+
+    return total
 
 
 if __name__ == "__main__":

@@ -29,7 +29,7 @@ htmlcontent = {
 }
 
 
-def eastmoney(bMilvus: bool, code: str, stockName: str, beginTime: str, endTime: str,
+def eastmoney(bMilvus: bool, code: str, stockName: str,num:int, beginTime: str, endTime: str,
               beStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
     domain = "eastmoney-stock-news"
     param_content = htmlcontent[domain]
@@ -48,7 +48,7 @@ def eastmoney(bMilvus: bool, code: str, stockName: str, beginTime: str, endTime:
         "%Y-%m-%d") if not beginTime else beginTime
     endTime = (datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d") if not endTime else endTime
     while flag and count < 5:
-        print(f"开始获取第{pageIndex}页数据")
+        print(f"开始获取第{num}个股票{code}的第{pageIndex}页数据")
         domainurl: str = param_content['domainurl']
         st = int(round(time.time() * 1000))
         domainurl = domainurl.replace("$code", code).replace("$pageIndex", str(pageIndex)).replace("$pageSize",
@@ -93,7 +93,7 @@ def eastmoney(bMilvus: bool, code: str, stockName: str, beginTime: str, endTime:
                 continue
             total += 1
 
-            print(f"开始处理第{total}条数据：{data[i]}")
+            print(f"开始处理第{num}个股票{code}的第{total}条数据：{data[i]}")
             url = data[i]['url']
             text, err = get_text(url, beStore)
             abstract = data[i]['content'].replace('</em>', '').replace('<em>', '').strip()
@@ -124,7 +124,7 @@ def eastmoney(bMilvus: bool, code: str, stockName: str, beginTime: str, endTime:
             print(f"第{total}条数据处理完成,数据内容：{json.dumps(metadata, ensure_ascii=False)}")
             print("\n")
 
-        if len(storageList) > 0:
+        if beStore and len(storageList) > 0:
             status = -1
             if bMilvus:
                 # 存入矢量库
@@ -142,20 +142,24 @@ def eastmoney(bMilvus: bool, code: str, stockName: str, beginTime: str, endTime:
         pageIndex += 1
         count = 0
 
-        # 异常数据处理
-    if len(errorList) > 0:
-        MongoDbStore("aifin_stock_error").storeData(errorList, -1).close()
-
-        # 日志入库
     content = f"{stockName}-{code}完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据,异常数据{len(errorList)}条"
-    logdata = [{"type": domain,
-                "code": code,
-                "name": stockName,
-                "createTime": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                "content": content}]
-    MongoDbStore("aifin_logs").storeData(logdata, 0).close()
     print(content)
+    if beStore:
+        # 异常数据处理
+        if len(errorList) > 0:
+            MongoDbStore("aifin_stock_error").storeData(errorList, -1).close()
+
+            # 日志入库
+        logdata = [{"type": domain,
+                    "code": code,
+                    "name": stockName,
+                    "createTime": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    "content": content}]
+        MongoDbStore("aifin_logs").storeData(logdata, 0).close()
+
+
+    return total
 
 
 if __name__ == "__main__":
-    eastmoney(False,"300375", "鹏翎股份", "2023-09-01", "2023-09-09", False)
+    eastmoney(False,"300375", "鹏翎股份",1, "2023-09-01", "2023-09-09", False)

@@ -64,6 +64,7 @@ def stock_tl_report(bMilvus: bool, sec_code: str, beginDateStr: str, endDateStr:
     tldb.close()
     print(f"【{sec_code}】一共处理了{total}条数据")
 
+    return total
 
 # （2）
 

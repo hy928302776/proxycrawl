@@ -1,7 +1,7 @@
 # ===================个股东方财富新闻资讯==============================
 import sys
 
-from storage.MySqlStore import  MainDb
+from storage.MySqlStore import MainDb
 from service.StockEastmoneyNews import eastmoney
 
 if __name__ == "__main__":
@@ -12,12 +12,17 @@ if __name__ == "__main__":
     beginTime = None if len(sys.argv) < 5 else sys.argv[4]  # 开始时间 "2023-08-27"
     endTime = None if len(sys.argv) < 6 else sys.argv[5]  # 结束时间"2023-08-28"
 
-
     print(f"参数列表，start:{start},offset:{offset},beginTime:{beginTime},endTime:{endTime}")
     stockList: list = MainDb().batchStockInfo(int(start), int(offset))
+    countTotal = 0
+    countmap = {}
     if stockList and len(stockList) > 0:
         num = 0
         for stock in stockList:
             num += 1
             print(f"一共获取到了{len(stockList)}支股票，现在处理第{num}个：{stock}")
-            eastmoney(bMilvus,stock['stock_code'], stock['securities_name'], beginTime, endTime)
+            total = eastmoney(bMilvus, stock['stock_code'], stock['securities_name'], num, beginTime, endTime)
+            countmap[stock['stock_code']] = total
+            countTotal += total
+
+    print(f"本次脚本一共处理了{countTotal}条数据，其中：{countmap}")
