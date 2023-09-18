@@ -29,7 +29,7 @@ htmlcontent = {
 }
 
 
-def eastmoney(bMilvus: bool, code: str, stockName: str,num:int, beginTime: str, endTime: str,
+def eastmoney_news(bMilvus: bool, code: str, stockName: str,num:int, beginTime: str, endTime: str,
               beStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
     domain = "eastmoney-stock-news"
     param_content = htmlcontent[domain]
@@ -39,15 +39,16 @@ def eastmoney(bMilvus: bool, code: str, stockName: str,num:int, beginTime: str, 
 
     # 遍历每一个URL
     total = 0
+    valid_data_total = 0  # 统计有效数据
     pageIndex = 1
     pageSize = 10
-    count = 0
+    err_count = 0
     flag = True
     errorList: list = []
     beginTime = (datetime.date.today() - datetime.timedelta(days=1)).strftime(
         "%Y-%m-%d") if not beginTime else beginTime
     endTime = (datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d") if not endTime else endTime
-    while flag and count < 5:
+    while flag and err_count < 5:
         print(f"开始获取第{num}个股票{code}的第{pageIndex}页数据")
         domainurl: str = param_content['domainurl']
         st = int(round(time.time() * 1000))
@@ -79,7 +80,8 @@ def eastmoney(bMilvus: bool, code: str, stockName: str,num:int, beginTime: str, 
         storageList: list = []
         for i in range(0, len(data)):
             print("\n---------------------")
-
+            total += 1
+            print(f"开始处理第{num}个股票{code}的第{total}条数据：{data[i]}")
             date = data[i]['date']
             s_date = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S').date()
             beginTimeObj = datetime.datetime.strptime(beginTime, "%Y-%m-%d").date()
@@ -91,9 +93,7 @@ def eastmoney(bMilvus: bool, code: str, stockName: str,num:int, beginTime: str, 
             if endTimeObj < s_date:
                 print(f"比结束时间还大，终止并继续下个循环")
                 continue
-            total += 1
 
-            print(f"开始处理第{num}个股票{code}的第{total}条数据：{data[i]}")
             url = data[i]['url']
             text, err = get_text(url, beStore)
             abstract = data[i]['content'].replace('</em>', '').replace('<em>', '').strip()
@@ -114,6 +114,7 @@ def eastmoney(bMilvus: bool, code: str, stockName: str,num:int, beginTime: str, 
                                                                                                                  '').strip(),
                         "mediaName": "" if "nickname" not in data[i] else data[i]['nickname'],
                         "text": text}
+            valid_data_total+=1
             if text:
                 storageList.append(metadata)
             else:
@@ -140,9 +141,9 @@ def eastmoney(bMilvus: bool, code: str, stockName: str,num:int, beginTime: str, 
         print(f"第{pageIndex}页数据处理完成")
         print("\n")
         pageIndex += 1
-        count = 0
+        err_count = 0
 
-    content = f"{stockName}-{code}完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据,异常数据{len(errorList)}条"
+    content = f"{stockName}-{code}完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据，有效数据{valid_data_total}条,异常数据{len(errorList)}条"
     print(content)
     if beStore:
         # 异常数据处理
@@ -158,8 +159,8 @@ def eastmoney(bMilvus: bool, code: str, stockName: str,num:int, beginTime: str, 
         MongoDbStore("aifin_logs").storeData(logdata, 0).close()
 
 
-    return total
+    return total,valid_data_total
 
 
 if __name__ == "__main__":
-    eastmoney(False,"300375", "鹏翎股份",1, "2023-09-01", "2023-09-09", False)
+    eastmoney_news(False,"300375", "鹏翎股份",1, "2023-09-01", "2023-09-09", False)
