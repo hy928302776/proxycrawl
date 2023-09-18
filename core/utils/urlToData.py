@@ -209,11 +209,12 @@ def requestUtil(link, **kwargs):
     from requests.adapters import HTTPAdapter
     from urllib3 import Retry
     # 创建重试策略
-    retries_http = Retry(total=3, backoff_factor=0.5, status_forcelist=[500, 502, 503, 504, 520])
-    retries_https = Retry(total=3, backoff_factor=1, status_forcelist=[500, 502, 503, 504, 520])
+    retries_http = Retry(total=10, backoff_factor=5, status_forcelist=[500, 502, 503, 504, 520])
+    retries_https = Retry(total=10, backoff_factor=5, status_forcelist=[500, 502, 503, 504, 520])
 
     # 创建一个带有重试策略的 Session 对象
     session = requests.Session()
+    session.proxies
 
     # 使用不同的重试策略挂载 http:// 和 https://
     session.mount('http://', HTTPAdapter(max_retries=retries_http))
