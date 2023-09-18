@@ -17,7 +17,7 @@ def stock_tl_report(bMilvus: bool, sec_code: str, beginDateStr: str, endDateStr:
     tldb = TlDb()
     # （1）获取符合条件的数据总数
     count_result = tldb.select(
-        f"select count(*) as `count` from rr_main where REPORT_TYPE='公司研究' AND SEC_CODE='{sec_code}' and WRITE_DATE between CONVERT('{beginDateStr}',DATE) and CONVERT('{endDateStr}',DATE)")
+        f"select count(*) as `count` from rr_main where REPORT_TYPE='公司研究' AND SEC_CODE='{sec_code}' and UPDATE_TIME between CONVERT('{beginDateStr}',DATE) and CONVERT('{endDateStr}',DATE)")
     print(f"符合条件的数据有{count_result[0]['count']}条")
     # （2）
     total = 0
@@ -32,7 +32,7 @@ def stock_tl_report(bMilvus: bool, sec_code: str, beginDateStr: str, endDateStr:
                    "'通联' AS mediaName,ra.ABSTRACT_TEXT AS `text`" \
                    " FROM rr_main rm INNER JOIN rr_abstract ra ON ra.REPORT_ID = rm.REPORT_ID" \
                    f" WHERE rm.REPORT_TYPE = '公司研究' AND rm.SEC_CODE = '{sec_code}' AND ra.ABSTRACT_TEXT IS NOT NULL" \
-                   f" AND rm.WRITE_DATE between CONVERT('{beginDateStr}',DATE) and CONVERT('{endDateStr}',DATE)" \
+                   f" AND rm.UPDATE_TIME between CONVERT('{beginDateStr}',DATE) and CONVERT('{endDateStr}',DATE)" \
                    f" LIMIT {startIndex},{offset}"
 
         print(f"开始执行sql:{querysql}")

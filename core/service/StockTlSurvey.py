@@ -15,7 +15,7 @@ def stock_tl_survey(bMilvus:bool,sec_code, beginDateStr: str, endDateStr: str,bS
     tldb = TlDb()
     # （1）获取符合条件的数据总数
     count_result = tldb.select(
-        f"select count(*) as `count` from equ_is_activity where TICKER_SYMBOL='{sec_code}' and PUBLISH_DATE between CONVERT('{beginDateStr}',DATE) and CONVERT('{endDateStr}',DATE)")
+        f"select count(*) as `count` from equ_is_activity where TICKER_SYMBOL='{sec_code}' and UPDATE_TIME between CONVERT('{beginDateStr}',DATE) and CONVERT('{endDateStr}',DATE)")
     print(f"符合条件的数据有{count_result[0]['count']}条")
     # （2）
     total = 0
@@ -28,7 +28,7 @@ def stock_tl_survey(bMilvus:bool,sec_code, beginDateStr: str, endDateStr: str,bS
         f" '{currenttime}' AS createTime,SUBSTR(IFNULL(ep.CONTENT,''),0,50) AS abstract,CONCAT(IFNULL(ea.SEC_SHORT_NAME,''),'于',IFNULL(ea.SURVEY_DATE,''),'在', IFNULL(ep.LOCATION,''),'的', IFNULL(ep.ACTIVITY_TYPE,''),'事件') AS title,"\
         " '通联' AS mediaName,ep.CONTENT AS `text`"\
         " FROM equ_is_activity ea INNER JOIN equ_is_participant_qa ep ON ea.EVENT_ID = ep.EVENT_ID"\
-        f" WHERE ea.TICKER_SYMBOL = '{sec_code}' AND ep.CONTENT IS NOT NULL AND ea.PUBLISH_DATE BETWEEN CONVERT('{beginDateStr}',DATE) and CONVERT('{endDateStr}',DATE) LIMIT {startIndex},{offset}"\
+        f" WHERE ea.TICKER_SYMBOL = '{sec_code}' AND ep.CONTENT IS NOT NULL AND ea.UPDATE_TIME BETWEEN CONVERT('{beginDateStr}',DATE) and CONVERT('{endDateStr}',DATE) LIMIT {startIndex},{offset}"\
 
         print(f"开始执行sql:{querysql}")
         query_result = tldb.select(querysql)
