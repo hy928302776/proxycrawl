@@ -136,6 +136,9 @@ def cls_macro_data(bMilvus: bool, industryCode: str, industryName: str, beginTim
         MongoDbStore("aifin_logs").storeData(logdata, 0).close()
 
 
+	return total,valid_data_total
+
+
 if __name__ == "__main__":
     datalist = [
         {"industryCode": "1103", "industryName": "A股盘面直播"},
@@ -149,4 +152,4 @@ if __name__ == "__main__":
     beginTime = '2023-09-10 00:00:00'
     endTime = '2023-09-11 00:00:00'
     for data in datalist:
-        cls_macro_data(data['industryCode'], data['industryName'], beginTime, endTime, False)
+        cls_macro_data(False,data['industryCode'], data['industryName'], beginTime, endTime, False)

@@ -111,3 +111,8 @@ class TlDb(DbConnect):
 
 if __name__ == '__main__':
     print(TlDb().listSecurityIdsByStock())
+    code='300239'
+    #是否龙虎榜
+    sql1 =f"select * from mkt_rank_list_stocks where TICKER_SYMBOL={code} and"
+    print(sql1)
+    print(TlDb().select(sql1))
