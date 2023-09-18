@@ -63,6 +63,7 @@ def east_notice(bMilvus:bool,code: str, stockName: str,num:int, beginTime: str, 
 
         print(f"link:{link}")  # 用于检查
         content = download_page(link, beStore)
+        print(f"content:{content}")
         if 'result_re' in param_content:
             content = re.findall(param_content['result_re'], content)[0]
         # 读取的是json文件。因此就用json打开啦
