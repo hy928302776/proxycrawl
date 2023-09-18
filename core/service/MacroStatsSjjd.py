@@ -137,6 +137,8 @@ def stats_sjjd(bMilvus:bool,beginTime: str, endTime: str, bStore: bool = True): 
                     "content": content}]
         MongoDbStore("aifin_logs").storeData(logdata, 0).close()
 
+    return total,valid_data_total
+
 
 
 if __name__ == "__main__":
