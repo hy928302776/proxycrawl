@@ -19,7 +19,10 @@ if __name__ == "__main__":
     result_totle = 0
     result_valid_data_total = 0
     result_map = {}
+
     for data in datalist:
+        print(f"开始获取{data['industryCode']}的数据，bMilvus：{bMilvus},beginTime:{beginTime},endTime:{endTime}")
+        print(f"一共{len(datalist)}组数据")
         total, valid_data_total = cls_macro_data(bMilvus, data['industryCode'], data['industryName'], beginTime,
                                                  endTime)
         result_totle += total

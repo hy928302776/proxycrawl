@@ -45,6 +45,7 @@ def cls_macro_data(bMilvus: bool, industryCode: str, industryName: str, beginTim
             err_count += 1
             continue
         # 读取的是json文件。因此就用json打开啦
+        print(f"content:{content}")
         jsonContent = json.loads(content)
         data = []
         if "data" in jsonContent:
