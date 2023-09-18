@@ -94,21 +94,6 @@ def east_notice(bMilvus:bool,code: str, stockName: str,num:int, beginTime: str, 
                 continue
 
             url = data[i]['url']
-            link = f"https://np-cnotice-stock.eastmoney.com/api/content/ann?art_code={data[i]['code']}&client_source=web&page_index=1&_={st}"
-            text_data = download_page(link, beStore)
-            text = ""
-            if text_data:
-                pre_data = json.loads(text_data)
-                if 'data' in pre_data and 'notice_content' in pre_data['data']:
-                    text = pre_data['data']['notice_content']
-            # （5）删除两个换行符之间的任意数量的空白字符
-            text = re.sub(r'\n\s*\n', r'\n\n', text.strip(), flags=re.M)
-            text = text.replace("\n\n", "").replace("  ", "")
-            abstract = data[i]['content'].replace('</em>', '').replace('<em>', '').strip()
-            if not abstract or len(abstract) == 0:
-                if text and len(text) > 0:
-                    abstract = text[0:100]
-
             metadata = {"source": "Web",
                         "uniqueId": "" if "code" not in data[i] else data[i]['code'],
                         "code": code,
@@ -117,11 +102,37 @@ def east_notice(bMilvus:bool,code: str, stockName: str,num:int, beginTime: str, 
                         "date": date,
                         "type": type,
                         "createTime": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                        "abstract": abstract,
                         "title": "" if "title" not in data[i] else data[i]['title'].replace('</em>', '').replace('<em>',
                                                                                                                  '').strip(),
                         "mediaName": "东方财富" if "nickname" not in data[i] else data[i]['nickname'],
-                        "text": text}
+                        }
+
+            #（4）获取text内容
+            link = f"https://np-cnotice-stock.eastmoney.com/api/content/ann?art_code={data[i]['code']}&client_source=web&page_index=1&_={st}"
+            text_data = download_page(link, beStore)
+            text = ""
+            if text_data:
+                try:
+                	pre_data = json.loads(text_data)
+                except Exception as e:
+                    err = f"解析返回数据异常，{e}"
+                    print(err)
+
+                if 'data' in pre_data and 'notice_content' in pre_data['data']:
+                    text = pre_data['data']['notice_content']
+
+                # （5）删除两个换行符之间的任意数量的空白字符
+                text = re.sub(r'\n\s*\n', r'\n\n', text.strip(), flags=re.M)
+                text = text.replace("\n\n", "").replace("  ", "")
+                abstract = data[i]['content'].replace('</em>', '').replace('<em>', '').strip()
+                if not abstract or len(abstract) == 0:
+                    if text and len(text) > 0:
+                        abstract = text[0:100]
+
+                metadata['abstract']=abstract
+                metadata['text']=text
+
+
             if text:
                 storageList.append(metadata)
             else:
