@@ -191,6 +191,7 @@ def download_page(url: str, useproxy: bool = True, **kwargs):
                     text = response.text.encode(code).decode('gbk')
                 except:
                     text = response.text
+        print(f"text:{text}")
         return text
     else:
         print("failed to download the page")
