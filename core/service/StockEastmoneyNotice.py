@@ -78,6 +78,8 @@ def east_notice(bMilvus:bool,code: str, stockName: str,num:int, beginTime: str, 
         storageList: list = []
         for i in range(0, len(data)):
             print("\n---------------------")
+            total += 1
+            print(f"开始处理第{num}个股票{code}的第{total}条数据：{data[i]}")
 
             date = data[i]['date']
             s_date = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S').date()
@@ -90,9 +92,7 @@ def east_notice(bMilvus:bool,code: str, stockName: str,num:int, beginTime: str, 
             if endTimeObj < s_date:
                 print(f"比结束时间还大，终止并继续下个循环")
                 continue
-            total += 1
 
-            print(f"开始处理第{num}个股票{code}的第{total}条数据：{data[i]}")
             url = data[i]['url']
             link = f"https://np-cnotice-stock.eastmoney.com/api/content/ann?art_code={data[i]['code']}&client_source=web&page_index=1&_={st}"
             text_data = download_page(link, beStore)
@@ -150,7 +150,7 @@ def east_notice(bMilvus:bool,code: str, stockName: str,num:int, beginTime: str, 
         pageIndex += 1
         count = 0
 
-    content = f"{stockName}-{code}完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据,异常数据{len(errorList)}条"
+    content = f"{stockName}-{code}完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据，有效数据{valid_data_total}条,异常数据{len(errorList)}条"
     print(content)
     if beStore:
         # 异常数据处理
@@ -166,7 +166,7 @@ def east_notice(bMilvus:bool,code: str, stockName: str,num:int, beginTime: str, 
                     "content": content}]
         MongoDbStore("aifin_logs").storeData(logdata, 0).close()
 
-    return total
+    return total,valid_data_total
 
 
 if __name__ == "__main__":
