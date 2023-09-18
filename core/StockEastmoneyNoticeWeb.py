@@ -17,4 +17,4 @@ if __name__ == "__main__":
         for stock in stockList:
             num += 1
             print(f"一共获取到了{len(stockList)}支股票，现在处理第{num}个：{stock}")
-            east_notice(bMilvus,stock['stock_code'], stock['securities_name'], beginTime, endTime)
+            east_notice(bMilvus,stock['stock_code'], stock['securities_name'],num, beginTime, endTime)

@@ -27,7 +27,7 @@ htmlcontent = {
 }
 
 
-def east_notice(bMilvus:bool,code: str, stockName: str, beginTime: str, endTime: str, beStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
+def east_notice(bMilvus:bool,code: str, stockName: str,num:int, beginTime: str, endTime: str, beStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
     type = "eastmoney-stock-notice"
     param_content = htmlcontent[type]
     if not param_content:
@@ -91,7 +91,7 @@ def east_notice(bMilvus:bool,code: str, stockName: str, beginTime: str, endTime:
                 continue
             total += 1
 
-            print(f"开始处理第{total}条数据：{data[i]}")
+            print(f"开始处理第{num}个股票{code}的第{total}条数据：{data[i]}")
             url = data[i]['url']
             link = f"https://np-cnotice-stock.eastmoney.com/api/content/ann?art_code={data[i]['code']}&client_source=web&page_index=1&_={st}"
             text_data = download_page(link, beStore)
