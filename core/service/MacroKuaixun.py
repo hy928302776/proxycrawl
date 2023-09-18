@@ -21,6 +21,7 @@ def kuaixun_macro(bMilvus: bool, beginTime: str, endTime: str, bStore: bool = Tr
     # 遍历每一个URL
     type = "kuaixun"  # 此次查询类型
     total = 0  # 统计总数量
+    valid_data_total = 0  # 统计有效数据
     pageIndex = 1  # 起始业
     err_count = 0  # 统计异常次数
     errorList: list = []  # 统计异常信息
@@ -103,6 +104,7 @@ def kuaixun_macro(bMilvus: bool, beginTime: str, endTime: str, bStore: bool = Tr
                 errdata.update(metadata)
                 errorList.append(errdata)
 
+            valid_data_total+=1
             print(f"第{total}条数据处理完成,数据内容：{json.dumps(metadata, ensure_ascii=False)}")
             print("\n")
 
@@ -124,7 +126,7 @@ def kuaixun_macro(bMilvus: bool, beginTime: str, endTime: str, bStore: bool = Tr
         pageIndex += 1
         err_count = 0
 
-    content = f"完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据,异常数据{len(errorList)}条"
+    content = f"完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据,有效数据{valid_data_total}条,异常数据{len(errorList)}条"
     print(content)
     # 异常数据处理
     if bStore:
@@ -137,6 +139,8 @@ def kuaixun_macro(bMilvus: bool, beginTime: str, endTime: str, bStore: bool = Tr
                     "createTime": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                     "content": content}]
         MongoDbStore("aifin_logs").storeData(logdata, 0).close()
+
+    return total,valid_data_total
 
 
 if __name__ == "__main__":
