@@ -16,9 +16,13 @@ def stock_tl_report(bMilvus: bool, sec_code: str, beginDateStr: str, endDateStr:
 
     tldb = TlDb()
     # （1）获取符合条件的数据总数
-    count_result = tldb.select(
-        f"select count(*) as `count` from rr_main where REPORT_TYPE='公司研究' AND SEC_CODE='{sec_code}' and UPDATE_TIME between CONVERT('{beginDateStr}',DATE) and CONVERT('{endDateStr}',DATE)")
-    print(f"符合条件的数据有{count_result[0]['count']}条")
+    count_sql = f"select count(*) as `count` from rr_main where REPORT_TYPE='公司研究' AND SEC_CODE='{sec_code}' and UPDATE_TIME between CONVERT('{beginDateStr}',DATE) and CONVERT('{endDateStr}',DATE)"
+    print(f"count_sql:{count_sql}")
+    count_result = tldb.select(count_sql)
+    result_count = count_result[0]['count']
+    print(f"符合条件的数据有{result_count}条")
+    if result_count==0:
+        return 0
     # （2）
     total = 0
     startIndex = 0
