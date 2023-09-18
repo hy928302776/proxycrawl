@@ -11,7 +11,7 @@ from storage.MySqlStore import TlDb
 def stock_tl_report(bMilvus: bool, sec_code: str, beginDateStr: str, endDateStr: str, bStore: bool = True):
     beginDateStr = (datetime.date.today() - datetime.timedelta(days=1)).strftime(
         "%Y-%m-%d") if not beginDateStr else beginDateStr
-    endDateStr = (datetime.date.today() - datetime.timedelta(days=1)).strftime(
+    endDateStr = (datetime.date.today()).strftime(
         "%Y-%m-%d") if not endDateStr else endDateStr
 
     tldb = TlDb()
