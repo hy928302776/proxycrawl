@@ -30,7 +30,7 @@ def pbcMacro(beginTime: str, endTime: str, bStore: bool = True):  # 两个参数
     # Yesterday = datetime.date.today() - datetime.timedelta(days=1)
     beginTime = (datetime.date.today() - datetime.timedelta(days=1)).strftime(
         "%Y-%m-%d") if not beginTime else beginTime
-    endTime = (datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d") if not endTime else endTime
+    endTime = (datetime.date.today()).strftime("%Y-%m-%d") if not endTime else endTime
     while count < 5:
         print(f"开始获取第{pageIndex}页数据")
         link = f"http://www.pbc.gov.cn/goutongjiaoliu/113456/113469/11040/index{pageIndex}.html"

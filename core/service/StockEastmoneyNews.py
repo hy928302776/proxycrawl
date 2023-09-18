@@ -47,7 +47,7 @@ def eastmoney_news(bMilvus: bool, code: str, stockName: str,num:int, beginTime: 
     errorList: list = []
     beginTime = (datetime.date.today() - datetime.timedelta(days=1)).strftime(
         "%Y-%m-%d") if not beginTime else beginTime
-    endTime = (datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d") if not endTime else endTime
+    endTime = (datetime.date.today()).strftime("%Y-%m-%d") if not endTime else endTime
     while flag and err_count < 5:
         print(f"开始获取第{num}个股票{code}的第{pageIndex}页数据")
         domainurl: str = param_content['domainurl']

@@ -23,7 +23,7 @@ def stats_zxfb(bMilvus: bool, beginTime: str, endTime: str, bStore: bool = True)
 
     beginTime = (datetime.date.today() - datetime.timedelta(days=1)).strftime(
         "%Y-%m-%d") if not beginTime else beginTime
-    endTime = (datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d") if not endTime else endTime
+    endTime = (datetime.date.today()).strftime("%Y-%m-%d") if not endTime else endTime
     flag = True
     while flag and err_count < 5:
 
@@ -135,6 +135,8 @@ def stats_zxfb(bMilvus: bool, beginTime: str, endTime: str, bStore: bool = True)
                     "createTime": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                     "content": content}]
         MongoDbStore("aifin_logs").storeData(logdata, 0).close()
+
+    return total,valid_data_total
 
 
 if __name__ == "__main__":

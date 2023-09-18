@@ -27,7 +27,7 @@ def kuaixun_macro(bMilvus: bool, beginTime: str, endTime: str, bStore: bool = Tr
 
     beginTime = (datetime.date.today() - datetime.timedelta(days=1)).strftime(
         "%Y-%m-%d") if not beginTime else beginTime
-    endTime = (datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d") if not endTime else endTime
+    endTime = (datetime.date.today()).strftime("%Y-%m-%d") if not endTime else endTime
     flag = True
     while flag and err_count < 5:
 
