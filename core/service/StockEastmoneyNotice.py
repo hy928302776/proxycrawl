@@ -39,13 +39,13 @@ def east_notice(bMilvus:bool,code: str, stockName: str,num:int, beginTime: str, 
     valid_data_total = 0  # 统计有效数据
     pageIndex = 1
     pageSize = 10
-    count = 0
+    err_count = 0
     flag = True
     errorList: list = []
     beginTime = (datetime.date.today() - datetime.timedelta(days=1)).strftime(
         "%Y-%m-%d") if not beginTime else beginTime
     endTime = (datetime.date.today()).strftime("%Y-%m-%d") if not endTime else endTime
-    while flag and count < 5:
+    while flag and err_count < 5:
         print(f"开始获取第{num}个股票{code}的第{pageIndex}页数据")
         domainurl: str = param_content['domainurl']
         st = int(round(time.time() * 1000))
@@ -63,7 +63,11 @@ def east_notice(bMilvus:bool,code: str, stockName: str,num:int, beginTime: str, 
 
         print(f"link:{link}")  # 用于检查
         content = download_page(link, beStore)
-        print(f"content:{content}")
+        # 判断查询列异常，重试机制
+        if not content or len(content) == 0:
+            err_count += 1
+            continue
+
         if 'result_re' in param_content:
             content = re.findall(param_content['result_re'], content)[0]
         # 读取的是json文件。因此就用json打开啦
@@ -118,19 +122,20 @@ def east_notice(bMilvus:bool,code: str, stockName: str,num:int, beginTime: str, 
                     err = f"解析返回数据异常，{e}"
                     print(err)
 
-                if 'data' in pre_data and 'notice_content' in pre_data['data']:
-                    text = pre_data['data']['notice_content']
+                if pre_data:
+                    if 'data' in pre_data and 'notice_content' in pre_data['data']:
+                        text = pre_data['data']['notice_content']
 
-                # （5）删除两个换行符之间的任意数量的空白字符
-                text = re.sub(r'\n\s*\n', r'\n\n', text.strip(), flags=re.M)
-                text = text.replace("\n\n", "").replace("  ", "")
-                abstract = data[i]['content'].replace('</em>', '').replace('<em>', '').strip()
-                if not abstract or len(abstract) == 0:
-                    if text and len(text) > 0:
-                        abstract = text[0:100]
+                    # （5）删除两个换行符之间的任意数量的空白字符
+                    text = re.sub(r'\n\s*\n', r'\n\n', text.strip(), flags=re.M)
+                    text = text.replace("\n\n", "").replace("  ", "")
+                    abstract = data[i]['content'].replace('</em>', '').replace('<em>', '').strip()
+                    if not abstract or len(abstract) == 0:
+                        if text and len(text) > 0:
+                            abstract = text[0:100]
 
-                metadata['abstract']=abstract
-                metadata['text']=text
+                    metadata['abstract']=abstract
+                    metadata['text']=text
 
 
             if text:
@@ -159,7 +164,7 @@ def east_notice(bMilvus:bool,code: str, stockName: str,num:int, beginTime: str, 
         print(f"第{pageIndex}页数据处理完成")
         print("\n")
         pageIndex += 1
-        count = 0
+        err_count = 0
 
     content = f"{stockName}-{code}完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据，有效数据{valid_data_total}条,异常数据{len(errorList)}条"
     print(content)

@@ -66,6 +66,11 @@ def eastmoney_news(bMilvus: bool, code: str, stockName: str,num:int, beginTime: 
 
         print(f"link:{link}")  # 用于检查
         content = download_page(link, beStore)
+        #判断查询列异常，重试机制
+        if not content or len(content)==0:
+            err_count+=1
+            continue
+
         if 'result_re' in param_content:
             content = re.findall(param_content['result_re'], content)[0]
         # 读取的是json文件。因此就用json打开啦
