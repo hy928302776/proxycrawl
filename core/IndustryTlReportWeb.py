@@ -19,4 +19,4 @@ if __name__ == "__main__":
         for industry in industryList:
             num += 1
             print(f"一共获取到了{len(industryList)}个行业，现在处理第{num}个：{industry}")
-            industry_tl_report(bMilvus,industry['industry_code'], industry['industry_name'], beginTime, endTime)
+            industry_tl_report(bMilvus,industry['industry_code'], industry['industry_name'],num, beginTime, endTime)

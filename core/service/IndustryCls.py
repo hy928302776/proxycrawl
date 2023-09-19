@@ -59,6 +59,10 @@ def cls_industry_data(bMilvus: bool, industryCode: str, industryName: str,num:in
         if "data" in jsonContent:
             data = jsonContent['data']
 
+        if data is None:
+            err_count += 1
+            continue
+
         print(f"第{num}个行业{industryCode}获取了{endTime_str}以来的{len(data)}条数据")
         # （5）解析单条数据
         storageList: list = []
