@@ -87,4 +87,5 @@ if __name__ == '__main__':
                  "title": '你好',
                  "mediaName": '中国',
                  "text": 'text'}]
-    MongoDbStore("aifin_stock").storeData(metadata, 0).close()
+    #MongoDbStore("aifin_stock").storeData(metadata, 0).close()
+    print(MongoDbStore("aifin_stock").countData({"status": {"$lt": 2}}))

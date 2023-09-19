@@ -14,7 +14,7 @@ from utils.urlToData import download_page
 from utils.urlToData import get_text
 
 
-def cls_industry_data(bMilvus: bool, industryCode: str, industryName: str, beginTime: str = None, endTime: str = None,
+def cls_industry_data(bMilvus: bool, industryCode: str, industryName: str,num:int, beginTime: str = None, endTime: str = None,
                       bStore=True):  # 两个参数分别表示开始读取与结束读取的页码
 
     # 遍历每一个URL
@@ -35,32 +35,38 @@ def cls_industry_data(bMilvus: bool, industryCode: str, industryName: str, begin
     flag = True
     while flag and err_count < 5:
         endTime_str = datetime.datetime.fromtimestamp(endTimeStamp).strftime('%Y-%m-%d %H:%M:%S')
-        print(f"开始获取{endTime_str}以来的数据")
+        print(f"开始第{num}个行业{industryCode}获取{endTime_str}以来的数据")
         # （3）组装请求路径
         link = f"https://www.cls.cn/api/subject/{industryCode}/article?app=CailianpressWeb&last_article_time={endTimeStamp}&os=web&Subject_Id={industryCode}&sv=7.7.5"
         print(f"link:{link}")  # 用于检查
         # crawUrl = f"{crowBaseUrl}&url={urllib.parse.quote(link)}"
         # （4）获取请求列表数据
         try:
-            content = download_page(link, crawbaseflag, headers={'user-agent': 'Mozilla/5.0'})
+            content = download_page(link, bStore, headers={'user-agent': 'Mozilla/5.0'})
             # response = requests.get(crawUrl, verify=False, timeout=30)  # 禁止重定向
         except:
             err_count += 1
             continue
+
+        # 如果是null说明异常，重试
+        if not content or len(content)==0:
+            err_count += 1
+            continue
+
+        data = []
         # 读取的是json文件。因此就用json打开啦
         jsonContent = json.loads(content)
-        data = []
         if "data" in jsonContent:
             data = jsonContent['data']
 
-        print(f"获取了{endTime_str}以来的{len(data)}条数据")
+        print(f"第{num}个行业{industryCode}获取了{endTime_str}以来的{len(data)}条数据")
         # （5）解析单条数据
         storageList: list = []
         for i in range(0, len(data)):
             print("\n---------------------")
             total += 1
             element_data = data[i]
-            print(f"开始处理第{total}条数据：{element_data}")
+            print(f"开始处理第{num}个行业{industryCode}第{total}条数据：{element_data}")
             # （6）通过日期判断是否符合条件
             s_datetime = element_data['article_time']
 
@@ -74,7 +80,7 @@ def cls_industry_data(bMilvus: bool, industryCode: str, industryName: str, begin
 
             # （7）获取字段数据数据
             url = f"https://www.cls.cn/detail/{element_data['article_id']}"
-            text, err = get_text(url, crawbaseflag, headers={'user-agent': 'Mozilla/5.0'})
+            text, err = get_text(url, bStore, headers={'user-agent': 'Mozilla/5.0'})
             abstract = element_data['article_brief']
             if (abstract is None or len(abstract) == 0) and text is not None and len(text) > 0:
                 abstract = text[0:100]
@@ -104,7 +110,7 @@ def cls_industry_data(bMilvus: bool, industryCode: str, industryName: str, begin
             endTimeStamp = s_datetime
             valid_data_total += 1  # 统计有效数据
 
-            print(f"第{total}条数据处理完成,数据内容：{json.dumps(metadata, ensure_ascii=False)}")
+            print(f"第{num}个行业{industryCode}第{total}条数据处理完成,数据内容：{json.dumps(metadata, ensure_ascii=False)}")
             print("\n")
 
         if bStore and len(storageList) > 0:
@@ -120,13 +126,13 @@ def cls_industry_data(bMilvus: bool, industryCode: str, industryName: str, begin
             # 存入mongoDB库
             MongoDbStore("aifin_industry").storeData(storageList, status).close()
 
-        print(f"获取{endTime_str}以来的{len(data)}条数据处理完成")
+        print(f"第{num}个行业{industryCode}获取{endTime_str}以来的{len(data)}条数据处理完成")
         print("\n")
         # 重置err_count判断条件
         err_count = 0
 
     beginTime_str = datetime.datetime.fromtimestamp(beginTimeStamp).strftime('%Y-%m-%d %H:%M:%S')
-    content = f"{industryCode}【{industryName}】完成了从{beginTime_str}到{endTime_str}内的数据，一共处理{total}条数据,有效数据{valid_data_total}条,异常数据{len(errorList)}条"
+    content = f"第{num}个行业{industryCode}【{industryName}】完成了从{beginTime_str}到{endTime_str}内的数据，一共处理{total}条数据,有效数据{valid_data_total}条,异常数据{len(errorList)}条"
     print(content)
     # 异常数据处理
     if bStore:
@@ -139,6 +145,8 @@ def cls_industry_data(bMilvus: bool, industryCode: str, industryName: str, begin
                     "createTime": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                     "content": content}]
         MongoDbStore("aifin_logs").storeData(logdata, 0).close()
+
+    return total,valid_data_total
 
 
 if __name__ == "__main__":
