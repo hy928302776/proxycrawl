@@ -13,10 +13,16 @@ if __name__ == "__main__":
 
     print(f"参数列表，bMilvus：{bMilvus},start:{start},offset:{offset}，beginTime:{beginTime},endTime:{endTime}")
 
-    industryList: list = MainDb().batchIndustryInfo("申万行业分类", start, offset,)
+    industryList: list = MainDb().batchIndustryInfo("申万行业分类", 1, start, offset, )
     if industryList and len(industryList) > 0:
         num = 0
+        result_totle = 0
+        result_map = {}
         for industry in industryList:
             num += 1
             print(f"一共获取到了{len(industryList)}个行业，现在处理第{num}个：{industry}")
-            industry_tl_report(bMilvus,industry['industry_code'], industry['industry_name'],num, beginTime, endTime)
+            total = industry_tl_report(bMilvus, industry['industry_code'], industry['industry_name'], num, beginTime,
+                                       endTime)
+            result_totle += total
+            result_map[industry['industry_code']] = f"处理了{total}条数据"
+    print(f"一共{len(industryList)}个行业，处理了{result_totle}条数据，其中：{result_map}")

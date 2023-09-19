@@ -42,7 +42,7 @@ class DbConnect():
 class MainDb(DbConnect):
     dbinfo = {
         "host": "36.138.93.247",
-        #"host": "192.168.0.3",
+        # "host": "192.168.0.3",
         "user": "root",
         "password": "QAZwsx123",
         "port": 31652}
@@ -67,12 +67,14 @@ class MainDb(DbConnect):
         self.close()
         return result
 
-    def batchIndustryInfo(self, belong: str=None, start: int = None, offset: int = None) -> list:
+    def batchIndustryInfo(self, belong: str, industry_level: int = 1, start: int = None,
+                          offset: int = None) -> list:
         """
         获取所有的表数据
         """
 
-        sqlList = [f"select industry_code,industry_name,belong from industry_info where is_deleted = 0"]
+        sqlList = [
+            f"select industry_code,industry_name,belong from industry_info where is_deleted = 0 and industry_level={industry_level}"]
 
         if belong is not None:
             sqlList.append(f" and belong='{belong}'")
@@ -89,7 +91,7 @@ class MainDb(DbConnect):
 
 class TlDb(DbConnect):
     dbinfo = {
-        #"host": "192.168.6.5",
+        # "host": "192.168.6.5",
         "host": "36.138.94.158",
         "user": "root",
         "password": "juw&2155FR345&$",
@@ -106,13 +108,6 @@ class TlDb(DbConnect):
         return result
 
 
-
-
-
 if __name__ == '__main__':
-    print(TlDb().listSecurityIdsByStock())
-    code='300239'
-    #是否龙虎榜
-    sql1 =f"select * from mkt_rank_list_stocks where TICKER_SYMBOL={code} and"
-    print(sql1)
-    print(TlDb().select(sql1))
+
+    print(MainDb().batchIndustryInfo('cls',2))

@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
     print(f"参数列表,start:{start},offset:{offset}，beginTime:{beginTime},endTime:{endTime}")
 
-    industryList: list = MainDb().batchIndustryInfo("cls", start, offset)
+    industryList: list = MainDb().batchIndustryInfo("cls",1, start, offset)
 
     result_totle = 0
     result_valid_data_total = 0
