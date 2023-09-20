@@ -128,6 +128,17 @@ analysis_method = [
      "extract": ["table"],
      "temp": "http://global.eastmoney.com/a/202309202852102465.html"
      },
+    {"domain": "http://futures.eastmoney.com/a/",
+     "value": [
+         {
+             "element": "div",
+             "attr": {"class": "txtinfos"},
+         }
+     ],
+     "replace": ["\n\n", "  "],
+     "extract": ["table"],
+     "temp": "http://futures.eastmoney.com/a/202309192852050569.html"
+     },
 ]
 
 
@@ -243,7 +254,7 @@ def requestUtil(link, **kwargs):
 
 if __name__ == '__main__':
     test = download_page(
-        "http://global.eastmoney.com/a/202309202852102465.html",
+        "http://futures.eastmoney.com/a/202309192852050569.html",
         False)
     # test, err = get_text("https://www.cls.cn/detail/1459408", False, headers={'user-agent': 'Mozilla/5.0'})
     soup = BeautifulSoup(test)
