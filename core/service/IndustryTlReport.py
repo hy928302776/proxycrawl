@@ -32,7 +32,7 @@ def industry_tl_report(bMilvus: bool, industry_code: str,industry_name:str,num:i
         # （1）根据REPORT_TYPE+SEC_CODE获取
 
         querysql = f"SELECT 'DB' AS source, IFNULL(CAST(rm.REPORT_ID AS CHAR),'') AS uniqueId,'{industry_code}' AS code,'{industry_name}' AS name ,IFNULL(CAST( rm.WRITE_DATE AS CHAR ),'') AS `date`,'' as url," \
-                   f" 'tl-stock-report' as type,'{currenttime}' as createTime, IFNULL(rm.ABSTRACT,'') as abstract,IFNULL(rm.TITLE,'') as title," \
+                   f" 'tl-industry-report' as type,'{currenttime}' as createTime, IFNULL(rm.ABSTRACT,'') as abstract,IFNULL(rm.TITLE,'') as title," \
                    "'通联' AS mediaName,ra.ABSTRACT_TEXT AS `text`" \
                    " FROM rr_main rm INNER JOIN rr_abstract ra ON ra.REPORT_ID = rm.REPORT_ID" \
                    f" WHERE rm.REPORT_TYPE = '行业研究' AND rm.INDUSTRY_L1 = '{industry_name}' AND ra.ABSTRACT_TEXT IS NOT NULL" \
