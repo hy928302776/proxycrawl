@@ -1,6 +1,9 @@
 # -*- coding: UTF-8 -*-
-import pymysql
+import sys
 
+import pymysql
+sys.path.append("..")
+from config.Logger import logger
 
 class DbConnect():
     def __init__(self, db_cof, database=""):
@@ -61,7 +64,7 @@ class MainDb(DbConnect):
         if start is not None and offset is not None:
             sqlList.append(f" limit {start},{offset}")
         sql = " ".join(sqlList)
-        print(f"sql:{sql}")
+        logger.info(f"sql:{sql}")
         ##db = self(dbinfo, database="milvus_data")
         result = self.select(sql)
         self.close()
@@ -83,7 +86,7 @@ class MainDb(DbConnect):
         if start is not None and offset is not None:
             sqlList.append(f" limit {start},{offset}")
         sql = " ".join(sqlList)
-        print(f"sql:{sql}")
+        logger.info(f"sql:{sql}")
         result = self.select(sql)
         self.close()
         return result
@@ -102,12 +105,12 @@ class TlDb(DbConnect):
 
     def listSecurityIdsByStock(self):
         sql = f"SELECT SECURITY_ID,TICKER_SYMBOL,SEC_SHORT_NAME FROM md_security limit 10"
-        print(f"sql:{sql}")
+        logger.info(f"sql:{sql}")
         result = self.select(sql)
         self.close()
         return result
 
 
 if __name__ == '__main__':
-
-    print(MainDb().batchIndustryInfo('cls',2))
+    logger.info("====")
+    logger.info(MainDb().batchIndustryInfo('cls',2))

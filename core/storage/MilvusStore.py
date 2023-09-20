@@ -1,12 +1,15 @@
 ###################### 存储类 ###############################################
 # -*- coding: UTF-8 -*-
 import copy
+import sys
 
 import torch
 from langchain.docstore.document import Document
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import Milvus
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+sys.path.append("..")
+from config.Logger import logger
 
 embedding_model_dict = {
     "ernie-tiny": "nghuyong/ernie-3.0-nano-zh",
@@ -18,7 +21,7 @@ embedding_model_dict = {
     "m3e-base": "/root/data/huggingface/moka-ai/m3e-base",
     "m3e-local": "/Users/huangying/data/huggingface/moka-ai/m3e-base",
 }
-EMBEDDING_MODEL = "m3e-small"
+EMBEDDING_MODEL = "m3e-local"
 EMBEDDING_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 
 
@@ -39,10 +42,10 @@ def storeData(docs: list[dict],collection_name:str,path:str="47.97.218.138:31865
         docList.append(docx)
 
     docs = load_and_split(docList)
-    print("开始HuggingFaceEmbeddings切分")
+    logger.info("开始HuggingFaceEmbeddings切分")
     embeddings = HuggingFaceEmbeddings(model_name=embedding_model_dict[EMBEDDING_MODEL],
                                        model_kwargs={'device': EMBEDDING_DEVICE})
-    print("进入存储阶段")
+    logger.info("进入存储阶段")
     count = 0
     obj = None
     while True and count < 3:
@@ -55,11 +58,11 @@ def storeData(docs: list[dict],collection_name:str,path:str="47.97.218.138:31865
             )
             break
         except Exception as e:
-            print(f"error,写入矢量库异常,{e}")
+            logger.info(f"error,写入矢量库异常,{e}")
             count += 1
     if not obj:
         raise Exception("写入矢量库异常")
-    print(f"写入矢量库【{collection_name }】over")
+    logger.info(f"写入矢量库【{collection_name }】over")
 
 
 if __name__ == '__main__':

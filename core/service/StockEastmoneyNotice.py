@@ -189,4 +189,4 @@ def east_notice(bMilvus:bool,code: str, stockName: str,num:int, beginTime: str, 
 
 
 if __name__ == "__main__":
-    east_notice("300375", "鹏翎股份", "2023-09-1", "2023-09-13", False)
+    east_notice(True,"300375", "鹏翎股份",1, "2023-09-1", "2023-09-13", True)

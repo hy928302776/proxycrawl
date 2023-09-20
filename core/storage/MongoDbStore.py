@@ -1,7 +1,10 @@
 # -*- coding: UTF-8 -*-
+import sys
+
 import pymongo
 from pymongo.errors import BulkWriteError
-
+sys.path.append("..")
+from config.Logger import logger
 
 class MongoDbStore:
     conn = None
@@ -29,7 +32,7 @@ class MongoDbStore:
         except BulkWriteError as e:
 
             pass  # 忽略重复的错误
-        print(f"写入mongodb【{self.collection_name}】库over")
+        logger.info(f"写入mongodb【{self.collection_name}】库over")
         return self
 
     def searchData(self, query: dict = {}, size: int = 100):
@@ -88,4 +91,4 @@ if __name__ == '__main__':
                  "mediaName": '中国',
                  "text": 'text'}]
     #MongoDbStore("aifin_stock").storeData(metadata, 0).close()
-    print(MongoDbStore("aifin_stock").countData({"status": {"$lt": 2}}))
+    logger.info(MongoDbStore("aifin_stock").countData({"status": {"$lt": 2}}))
