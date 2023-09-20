@@ -14,6 +14,7 @@ from utils.urlToData import download_page
 from utils.urlToData import get_text
 from storage import MilvusStore
 from storage.MongoDbStore import MongoDbStore
+from config.Logger import logger
 
 htmlcontent = {
     "eastmoney-stock-news": {
@@ -34,7 +35,7 @@ def eastmoney_news(bMilvus: bool, code: str, stockName: str,num:int, beginTime: 
     domain = "eastmoney-stock-news"
     param_content = htmlcontent[domain]
     if not param_content:
-        print(f"该域名数据无法获取，domain:{domain}")
+        logger.info(f"该域名数据无法获取，domain:{domain}")
         return
 
     # 遍历每一个URL
@@ -49,7 +50,7 @@ def eastmoney_news(bMilvus: bool, code: str, stockName: str,num:int, beginTime: 
         "%Y-%m-%d") if not beginTime else beginTime
     endTime = (datetime.date.today()).strftime("%Y-%m-%d") if not endTime else endTime
     while flag and err_count < 5:
-        print(f"开始获取第{num}个股票{code}的第{pageIndex}页数据")
+        logger.info(f"开始获取第{num}个股票{code}的第{pageIndex}页数据")
         domainurl: str = param_content['domainurl']
         st = int(round(time.time() * 1000))
         domainurl = domainurl.replace("$code", code).replace("$pageIndex", str(pageIndex)).replace("$pageSize",
@@ -64,7 +65,7 @@ def eastmoney_news(bMilvus: bool, code: str, stockName: str,num:int, beginTime: 
                                                                                                str(pageSize))
             link = link + "&" + key + "=" + urllib.parse.quote(value)
 
-        print(f"link:{link}")  # 用于检查
+        logger.info(f"link:{link}")  # 用于检查
         content = download_page(link, beStore)
         #判断查询列异常，重试机制
         if not content or len(content)==0:
@@ -79,24 +80,24 @@ def eastmoney_news(bMilvus: bool, code: str, stockName: str,num:int, beginTime: 
         for pre in param_content['data']:
             data = data[pre]
 
-        print(f"获取第{pageIndex}页的数据，大小为{len(data)}")
+        logger.info(f"获取第{pageIndex}页的数据，大小为{len(data)}")
         if len(data) == 0:
             break
         storageList: list = []
         for i in range(0, len(data)):
-            print("\n---------------------")
+            logger.info("\n---------------------")
             total += 1
-            print(f"开始处理第{num}个股票{code}的第{total}条数据：{data[i]}")
+            logger.info(f"开始处理第{num}个股票{code}的第{total}条数据：{data[i]}")
             date = data[i]['date']
             s_date = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S').date()
             beginTimeObj = datetime.datetime.strptime(beginTime, "%Y-%m-%d").date()
             if beginTimeObj > s_date:
-                print("比开始时间还小，直接结束本次任务")
+                logger.info("比开始时间还小，直接结束本次任务")
                 flag = False
                 break
             endTimeObj = datetime.datetime.strptime(endTime, "%Y-%m-%d").date()
             if endTimeObj < s_date:
-                print(f"比结束时间还大，终止并继续下个循环")
+                logger.info(f"比结束时间还大，终止并继续下个循环")
                 continue
 
             url = data[i]['url']
@@ -127,8 +128,8 @@ def eastmoney_news(bMilvus: bool, code: str, stockName: str,num:int, beginTime: 
                 errdata.update(metadata)
                 errorList.append(errdata)
 
-            print(f"第{total}条数据处理完成,数据内容：{json.dumps(metadata, ensure_ascii=False)}")
-            print("\n")
+            logger.info(f"第{total}条数据处理完成,数据内容：{json.dumps(metadata, ensure_ascii=False)}")
+            logger.info("\n")
 
         if beStore and len(storageList) > 0:
             status = -1
@@ -138,18 +139,18 @@ def eastmoney_news(bMilvus: bool, code: str, stockName: str,num:int, beginTime: 
                 try:
                     MilvusStore.storeData(storageList, f"aifin_stock_{code}")
                 except Exception as e:
-                    print(f"第{pageIndex}页的数据，大小为{len(data)} 存入矢量库异常,{e}")
+                    logger.info(f"第{pageIndex}页的数据，大小为{len(data)} 存入矢量库异常,{e}")
                     status = -1
             # 存入mongoDB库
             MongoDbStore("aifin_stock").storeData(storageList, status).close()
 
-        print(f"第{pageIndex}页数据处理完成")
-        print("\n")
+        logger.info(f"第{pageIndex}页数据处理完成")
+        logger.info("\n")
         pageIndex += 1
         err_count = 0
 
     content = f"{stockName}-{code}完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据，有效数据{valid_data_total}条,异常数据{len(errorList)}条"
-    print(content)
+    logger.info(content)
     if beStore:
         # 异常数据处理
         if len(errorList) > 0:

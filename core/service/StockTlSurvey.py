@@ -6,7 +6,7 @@ sys.path.append("..")
 from storage import MilvusStore
 from storage.MongoDbStore import MongoDbStore
 from storage.MySqlStore import TlDb
-
+from config.Logger import logger
 
 def stock_tl_survey(bMilvus:bool,sec_code, beginDateStr: str, endDateStr: str,bStore:bool=True):
     beginDateStr = (datetime.date.today() - datetime.timedelta(days=1)).strftime(
@@ -15,10 +15,10 @@ def stock_tl_survey(bMilvus:bool,sec_code, beginDateStr: str, endDateStr: str,bS
     tldb = TlDb()
     # （1）获取符合条件的数据总数
     countSql = f"select count(*) as `count` from equ_is_activity where TICKER_SYMBOL='{sec_code}' and UPDATE_TIME between CONVERT('{beginDateStr}',DATE) and CONVERT('{endDateStr}',DATE)"
-    print(f"countSql:{countSql}")
+    logger.info(f"countSql:{countSql}")
     count_result = tldb.select(countSql)
     result_count = count_result[0]['count']
-    print(f"符合条件的数据有{result_count}条")
+    logger.info(f"符合条件的数据有{result_count}条")
     if result_count==0:
         return 0
 
@@ -35,14 +35,14 @@ def stock_tl_survey(bMilvus:bool,sec_code, beginDateStr: str, endDateStr: str,bS
         " FROM equ_is_activity ea INNER JOIN equ_is_participant_qa ep ON ea.EVENT_ID = ep.EVENT_ID"\
         f" WHERE ea.TICKER_SYMBOL = '{sec_code}' AND ep.CONTENT IS NOT NULL AND ea.UPDATE_TIME BETWEEN CONVERT('{beginDateStr}',DATE) and CONVERT('{endDateStr}',DATE) LIMIT {startIndex},{offset}"\
 
-        print(f"开始执行sql:{querysql}")
+        logger.info(f"开始执行sql:{querysql}")
         query_result = tldb.select(querysql)
 
         if len(query_result) == 0:
-            print(f"本次【{sec_code}】未找到符合的数据")
+            logger.info(f"本次【{sec_code}】未找到符合的数据")
             break
         # （2）入库处理
-        print(f"本次【{sec_code}】获取到{len(query_result)}条数据")
+        logger.info(f"本次【{sec_code}】获取到{len(query_result)}条数据")
         if bStore:
             status=-1
             if bMilvus:
@@ -50,11 +50,11 @@ def stock_tl_survey(bMilvus:bool,sec_code, beginDateStr: str, endDateStr: str,bS
                 try:
                     MilvusStore.storeData(query_result, f"aifin_stock_{sec_code}")
                 except Exception as e:
-                    print(f"{sec_code}的数据，大小为{len(query_result)} 存入矢量库异常,{e}")
+                    logger.info(f"{sec_code}的数据，大小为{len(query_result)} 存入矢量库异常,{e}")
                     status = -1
             # 存入mongoDB库
             MongoDbStore("aifin_stock").storeData(query_result, status).close()
-            print("本次入库完成")
+            logger.info("本次入库完成")
 
         total += len(query_result)
         # （3）后续处理
@@ -63,7 +63,7 @@ def stock_tl_survey(bMilvus:bool,sec_code, beginDateStr: str, endDateStr: str,bS
 
     # （4）关闭矢量库
     tldb.close()
-    print(f"【{sec_code}】一共处理了{total}条数据")
+    logger.info(f"【{sec_code}】一共处理了{total}条数据")
 
     return total
 # （2）

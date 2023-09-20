@@ -10,7 +10,9 @@ import chardet
 import requests
 from bs4 import BeautifulSoup, Comment
 
+
 sys.path.append("..")
+from config.Logger import logger
 from config.common_config import crowBaseUrl
 
 analysis_method = [
@@ -160,23 +162,23 @@ def get_text(url, useproxy: bool = True, **kwargs):
             return text, None
         else:
             errlog = f"该url【{url}】没有配置内容解析方式"
-            print(errlog)
+            logger.info(errlog)
             return text, errlog
 
     except Exception as e:
-        print(f"解析网页内容异常:{e}")
+        logger.info(f"解析网页内容异常:{e}")
         return text, f"解析网页内容异常:{e}"
 
 
 def download_page(url: str, useproxy: bool = True, **kwargs):
     if not url or len(url.strip()) == 0:
         return ""
-    print(f"url:{url}")
+    logger.info(f"url:{url}")
     crawUrl = f"{crowBaseUrl}&url={urllib.parse.quote(url)}" if useproxy else url
-    print(f"crawUrl:{crawUrl}")
+    logger.info(f"crawUrl:{crawUrl}")
     starttime = int(time.time() * 1000)
     response = requestUtil(crawUrl, **kwargs)
-    print(f"response:{response}，耗时：{int(time.time() * 1000) - starttime}")
+    logger.info(f"response:{response}，耗时：{int(time.time() * 1000) - starttime}")
     if response.status_code == 200:
         # 以下为乱码异常处理
         try:
@@ -191,18 +193,18 @@ def download_page(url: str, useproxy: bool = True, **kwargs):
                     text = response.text.encode(code).decode('gbk')
                 except:
                     text = response.text
-        print(f"text:{text}")
+        logger.info(f"text前1000:{text[0:1000]}")
         return text
     else:
-        print("failed to download the page")
+        logger.info("failed to download the page")
         raise Exception(f"获取页面数据异常：{crawUrl}")
         # try:
         #     if response:
-        #         print(json.dumps(response))
+        #         logger.info(json.dumps(response))
         #     else:
-        #         print("response is None")
+        #         logger.info("response is None")
         # except:
-        #     print("解析response异常")
+        #     logger.info("解析response异常")
 
 
 def requestUtil(link, **kwargs):
@@ -232,4 +234,4 @@ if __name__ == '__main__':
         "https://np-cnotice-stock.eastmoney.com/api/content/ann?art_code=AN202309071597979547&client_source=web&page_index=1&_=1694897075027",
         False)
     # test, err = get_text("https://www.cls.cn/detail/1459408", False, headers={'user-agent': 'Mozilla/5.0'})
-    print(test)
+    logger.info(test)

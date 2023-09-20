@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 from utils.urlToData import download_page, get_text
 from storage import MilvusStore
 from storage.MongoDbStore import MongoDbStore
+from config.Logger import logger
 
 def stats_sjjd(bMilvus:bool,beginTime: str, endTime: str, bStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
 
@@ -27,13 +28,13 @@ def stats_sjjd(bMilvus:bool,beginTime: str, endTime: str, bStore: bool = True): 
     flag = True
     while flag and err_count < 5:
 
-        print(f"开始获取第{pageIndex}页数据")
+        logger.info(f"开始获取第{pageIndex}页数据")
         ## （1）组装请求路径
         suffix = ""
         if pageIndex > 1:
             suffix = f"_{pageIndex - 1}"
         link = f"http://www.stats.gov.cn/sj/sjjd/index{suffix}.html"
-        print(f"请求路径:{link}")
+        logger.info(f"请求路径:{link}")
 
         # （2）请求列表数据
         list_data = []
@@ -42,31 +43,31 @@ def stats_sjjd(bMilvus:bool,beginTime: str, endTime: str, bStore: bool = True): 
             list_data = soup.find("div", {"class", "list-content"}).find("ul").find_all("li")
         except:
             err_count += 1
-            print(f"获取第{pageIndex}页数据异常")
+            logger.info(f"获取第{pageIndex}页数据异常")
             continue
-        print(f"获取第{pageIndex}页的数据，大小为{len(list_data)}")
+        logger.info(f"获取第{pageIndex}页的数据，大小为{len(list_data)}")
         if len(list_data) == 0:
             break
 
         # （3）解析单条数据
         storageList: list = []
         for i in range(0, len(list_data)):
-            print("\n---------------------")
+            logger.info("\n---------------------")
             total += 1
             element_data = list_data[i]
-            print(f"开始处理第{total}条数据：{element_data}")
+            logger.info(f"开始处理第{total}条数据：{element_data}")
 
             # （4）通过日期判断是否符合条件
             publishDate = element_data.find_next('span').getText().strip()
             s_date = datetime.datetime.strptime(publishDate, "%Y-%m-%d").date()
             beginTimeObj = datetime.datetime.strptime(beginTime, "%Y-%m-%d").date()
             if beginTimeObj > s_date:
-                print("比开始时间还小，直接结束本次任务")
+                logger.info("比开始时间还小，直接结束本次任务")
                 flag = False
                 break
             endTimeObj = datetime.datetime.strptime(endTime, "%Y-%m-%d").date()
             if endTimeObj < s_date:
-                print(f"比结束时间还大，终止并继续下个循环")
+                logger.info(f"比结束时间还大，终止并继续下个循环")
                 continue
 
             # （5）获取摘要内容
@@ -101,8 +102,8 @@ def stats_sjjd(bMilvus:bool,beginTime: str, endTime: str, bStore: bool = True): 
                 errorList.append(errdata)
 
             valid_data_total += 1
-            print(f"第{total}条数据处理完成,数据内容：{json.dumps(metadata, ensure_ascii=False)}")
-            print("\n")
+            logger.info(f"第{total}条数据处理完成,数据内容：{json.dumps(metadata, ensure_ascii=False)}")
+            logger.info("\n")
 
 
         if bStore and len(storageList) > 0:
@@ -113,18 +114,18 @@ def stats_sjjd(bMilvus:bool,beginTime: str, endTime: str, bStore: bool = True): 
                 try:
                     MilvusStore.storeData(storageList, "aifin_macro")
                 except Exception as e:
-                    print(f"第{pageIndex}页的数据，大小为{len(list_data)} 存入矢量库异常:{e}")
+                    logger.info(f"第{pageIndex}页的数据，大小为{len(list_data)} 存入矢量库异常:{e}")
                     status = -1
             # 存入mongoDB库
             MongoDbStore("aifin_macro").storeData(storageList, status).close()
 
-        print(f"第{pageIndex}页数据处理完成")
-        print("\n")
+        logger.info(f"第{pageIndex}页数据处理完成")
+        logger.info("\n")
         pageIndex += 1
         err_count = 0
 
     content = f"完成了从{beginTime}到{endTime}内的数据，一共处理{total}条数据,有效数据{valid_data_total}条,异常数据{len(errorList)}条"
-    print(content)
+    logger.info(content)
     # 异常数据处理
     if bStore:
         if len(errorList) > 0:

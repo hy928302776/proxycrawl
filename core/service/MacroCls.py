@@ -9,7 +9,7 @@ from storage import MilvusStore
 from storage.MongoDbStore import MongoDbStore
 from utils.urlToData import download_page
 from utils.urlToData import get_text
-
+from config.Logger import logger
 
 def cls_macro_data(bMilvus: bool, industryCode: str, industryName: str, beginTime: str = None, endTime: str = None,
                    bStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
@@ -32,10 +32,10 @@ def cls_macro_data(bMilvus: bool, industryCode: str, industryName: str, beginTim
     flag = True
     while flag and err_count < 5:
         endTime_str = datetime.datetime.fromtimestamp(endTimeStamp).strftime('%Y-%m-%d %H:%M:%S')
-        print(f"开始获取{endTime_str}以来的数据")
+        logger.info(f"开始获取{endTime_str}以来的数据")
         # （3）组装请求路径
         link = f"https://www.cls.cn/api/subject/{industryCode}/article?app=CailianpressWeb&last_article_time={endTimeStamp}&os=web&Subject_Id={industryCode}&sv=7.7.5"
-        print(f"link:{link}")  # 用于检查
+        logger.info(f"link:{link}")  # 用于检查
         # crawUrl = f"{crowBaseUrl}&url={urllib.parse.quote(link)}"
         # （4）获取请求列表数据
         try:
@@ -55,23 +55,23 @@ def cls_macro_data(bMilvus: bool, industryCode: str, industryName: str, beginTim
         if "data" in jsonContent:
             data = jsonContent['data']
 
-        print(f"获取了{endTime_str}以来的{len(data)}条数据")
+        logger.info(f"获取了{endTime_str}以来的{len(data)}条数据")
         # （5）解析单条数据
         storageList: list = []
         for i in range(0, len(data)):
-            print("\n---------------------")
+            logger.info("\n---------------------")
             total += 1
             element_data = data[i]
-            print(f"开始处理第{total}条数据：{element_data}")
+            logger.info(f"开始处理第{total}条数据：{element_data}")
             # （6）通过日期判断是否符合条件
             s_datetime = element_data['article_time']
 
             if beginTimeStamp > s_datetime:
-                print("比开始时间还小，直接结束本次任务")
+                logger.info("比开始时间还小，直接结束本次任务")
                 flag = False
                 break
             if endTimeStamp < s_datetime:
-                print(f"比结束时间还大，终止并继续下个循环")
+                logger.info(f"比结束时间还大，终止并继续下个循环")
                 continue
 
             # （7）获取字段数据数据
@@ -104,8 +104,8 @@ def cls_macro_data(bMilvus: bool, industryCode: str, industryName: str, beginTim
             endTimeStamp = s_datetime
             valid_data_total += 1  # 统计有效数据
 
-            print(f"第{total}条数据处理完成,数据内容：{json.dumps(metadata, ensure_ascii=False)}")
-            print("\n")
+            logger.info(f"第{total}条数据处理完成,数据内容：{json.dumps(metadata, ensure_ascii=False)}")
+            logger.info("\n")
 
         if bStore and len(storageList) > 0:
             status = -1
@@ -115,19 +115,19 @@ def cls_macro_data(bMilvus: bool, industryCode: str, industryName: str, beginTim
                 try:
                     MilvusStore.storeData(storageList, f"aifin_macro")
                 except Exception as e:
-                    print(f"{endTime_str}以来的{len(data)}条数据， 存入矢量库异常:{e}")
+                    logger.info(f"{endTime_str}以来的{len(data)}条数据， 存入矢量库异常:{e}")
                     status = -1
             # 存入mongoDB库
             MongoDbStore("aifin_macro").storeData(storageList, status).close()
 
-        print(f"获取{endTime_str}以来的{len(data)}条数据处理完成")
-        print("\n")
+        logger.info(f"获取{endTime_str}以来的{len(data)}条数据处理完成")
+        logger.info("\n")
         # 重置err_count判断条件
         err_count = 0
 
     beginTime_str = datetime.datetime.fromtimestamp(beginTimeStamp).strftime('%Y-%m-%d %H:%M:%S')
     content = f"完成了从{beginTime_str}到{endTime_str}内的数据，一共处理{total}条数据,有效数据{valid_data_total}条,异常数据{len(errorList)}条"
-    print(content)
+    logger.info(content)
     # 异常数据处理
     if bStore:
         if len(errorList) > 0:

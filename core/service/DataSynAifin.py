@@ -5,7 +5,7 @@ sys.path.append("..")
 from pymongo import UpdateOne
 from storage import MilvusStore
 from storage.MongoDbStore import MongoDbStore
-
+from config.Logger import logger
 
 def data_sys_aifin(monggo_db: str, milvus_db: str, fenku: bool, status: int = 1):
     """
@@ -23,14 +23,14 @@ def data_sys_aifin(monggo_db: str, milvus_db: str, fenku: bool, status: int = 1)
     count = dbStore.countData({"status": {"$lt": status}})
     item_list = dbStore.listgroupCount({"status": {"$lt": status}},"code")
     searchList = list(item_list)
-    print(f"一共有{count}条数据需要处理,各item数量{searchList}")
+    logger.info(f"一共有{count}条数据需要处理,各item数量{searchList}")
 
     total = 0  # 统计处理数据总数
     # （3）循环处理每个item
     for item_info in searchList:
         item = item_info['_id']
         pre_count = item_info['count']  # 每只item需处理的总个数
-        print(f"开始处理item{item}，数量{pre_count}")
+        logger.info(f"开始处理item{item}，数量{pre_count}")
 
         collects = [
             {"status": {"$lt": status}},
@@ -58,7 +58,7 @@ def data_sys_aifin(monggo_db: str, milvus_db: str, fenku: bool, status: int = 1)
                 # 使用字典推导式生成新字典
                 milvus_datalist.append({key: value for key, value in document.items() if key not in keys_to_remove})
 
-            print(f"milvus_datalist:{milvus_datalist}")
+            logger.info(f"milvus_datalist:{milvus_datalist}")
             # （4）入矢量库
             milvus_db_str = f"{milvus_db}_{item}" if fenku else milvus_db
 
@@ -67,13 +67,13 @@ def data_sys_aifin(monggo_db: str, milvus_db: str, fenku: bool, status: int = 1)
             result = dbStore.collection.bulk_write(bulk_operations)
             update_count = result.modified_count
             # 输出更新结果
-            print("更新的文档数量:", update_count)
+            logger.info("更新的文档数量:", update_count)
             pre_totle += update_count
-            print(f"{item}一共有{pre_count}条数据需要处理,现在处理了{pre_totle}条数据")
+            logger.info(f"{item}一共有{pre_count}条数据需要处理,现在处理了{pre_totle}条数据")
 
-        print(f"同步{item}数据表完成，一共处理{pre_totle}条数据")
+        logger.info(f"同步{item}数据表完成，一共处理{pre_totle}条数据")
         total += pre_totle
-    print(f"所有数据处理完成一共{count}条数据，处理了{total}条数据")
+    logger.info(f"所有数据处理完成一共{count}条数据，处理了{total}条数据")
     dbStore.close()
 
 

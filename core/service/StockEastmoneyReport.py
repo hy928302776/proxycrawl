@@ -13,7 +13,7 @@ from config.common_config import crowBaseUrl
 from storage import MilvusStore
 from storage.MongoDbStore import MongoDbStore
 from utils.urlToData import get_text
-
+from config.Logger import logger
 
 def eastmoney(code: str, stockName: str, beginTime: str, endTime: str, bStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
     type = "eastmoney-stock-report"
@@ -28,15 +28,15 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str, bStore: b
         "%Y-%m-%d") if not beginTime else beginTime
     endTime = (datetime.date.today()).strftime("%Y-%m-%d") if not endTime else endTime
     while count < 5:
-        print(f"开始获取第{pageIndex}页数据")
+        logger.info(f"开始获取第{pageIndex}页数据")
         st = int(round(time.time() * 1000))
         link = f"https://reportapi.eastmoney.com/report/list?industryCode=*&pageSize={pageSize}&industry=*&rating=*&ratingChange=*&beginTime={beginTime}&endTime={endTime}&pageNo={pageIndex}&fields=&qType=0&orgCode=&code={code}&_={st}"
 
-        print(f"link:{link}")  # 用于检查
+        logger.info(f"link:{link}")  # 用于检查
         crawUrl = f"{crowBaseUrl}&url={urllib.parse.quote(link)}"
         try:
             response = requests.get(crawUrl, verify=False, timeout=30)  # 禁止重定向
-            print(response.text)
+            logger.info(response.text)
         except:
             count += 1
             continue
@@ -48,14 +48,14 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str, bStore: b
             if "data" in jsonContent:
                 data = jsonContent['data']
 
-        print(f"获取第{pageIndex}页的数据，大小为{len(data)}")
+        logger.info(f"获取第{pageIndex}页的数据，大小为{len(data)}")
         if len(data) == 0:
             break
         storageList: list = []
         for i in range(0, len(data)):
-            print("\n---------------------")
+            logger.info("\n---------------------")
             total += 1
-            print(f"开始处理第{total}条数据：{data[i]}")
+            logger.info(f"开始处理第{total}条数据：{data[i]}")
             url = f"https://data.eastmoney.com/report/info/{data[i]['infoCode']}.html"
 
             text, err = get_text(url)
@@ -84,8 +84,8 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str, bStore: b
                 errdata.update(metadata)
                 errorList.append(errdata)
 
-            print(f"第{total}条数据处理完成,数据内容：{json.dumps(metadata, ensure_ascii=False)}")
-            print("\n")
+            logger.info(f"第{total}条数据处理完成,数据内容：{json.dumps(metadata, ensure_ascii=False)}")
+            logger.info("\n")
 
         if bStore and len(storageList) > 0:
             # 存入矢量库
@@ -93,13 +93,13 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str, bStore: b
             try:
                 MilvusStore.storeData(storageList, f"aifin_stock_{code}")
             except:
-                print(f"第{pageIndex}页的数据，大小为{len(data)} 存入矢量库异常")
+                logger.info(f"第{pageIndex}页的数据，大小为{len(data)} 存入矢量库异常")
                 status = 2
             # 存入mongoDB库
             MongoDbStore("aifin_stock").storeData(storageList, status).close()
 
-        print(f"第{pageIndex}页数据处理完成")
-        print("\n")
+        logger.info(f"第{pageIndex}页数据处理完成")
+        logger.info("\n")
         pageIndex += 1
         count = 0
 
@@ -115,7 +115,7 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str, bStore: b
                 "createTime": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                 "content": content}]
     MongoDbStore("aifin_logs").storeData(logdata, 0).close()
-    print(content)
+    logger.info(content)
 
 
 if __name__ == "__main__":

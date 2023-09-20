@@ -49,13 +49,13 @@ class GetLog(object):
                 format = logging.Formatter(fmt, datefmt=datefmt)
 
                 # 日志输出到文件，只保存到单一文件，容量会无限大，一般不用，采用时间节点分割(运行时，即使没有日志输出结果，也会创建一个空的日志文件)
-                file_handler = logging.FileHandler(logs_path + filename)
+                #file_handler = logging.FileHandler(logs_path + filename)
                 # 日志输出到文件，依据时间切割到不同文件中,when以什么时间单位进行分割（秒、分钟、小时、天、午夜等）
                 # interval间隔多久，backupCount保留文件数量，超过数量时间久远的自动被替换掉
                 # 例如：以每一晚进行切割日志，保留30个文件
                 # file_handler = logging.handlers.TimedRotatingFileHandler(logs_path + filename, when='midnight', interval=1, backupCount=30)
-                file_handler.setLevel(logging.INFO)
-                file_handler.setFormatter(format)
+                #file_handler.setLevel(logging.INFO)
+                #file_handler.setFormatter(format)
 
                 # 只输出error级别的日志到文件，可以快速定位代码问题(运行时，即使没有日志输出结果，也会创建一个空的日志文件)
                 # error_file_handler = logging.handlers.TimedRotatingFileHandler(logs_path + 'error_' + filename, when='midnight', interval=1, backupCount=30)
@@ -69,7 +69,7 @@ class GetLog(object):
                 console.setFormatter(format)
 
                 # 添加处理器Handler到日志器中
-                cls.logger.addHandler(file_handler)
+                #cls.logger.addHandler(file_handler)
                 # cls.logger.addHandler(error_file_handler)
                 cls.logger.addHandler(console)
             return cls.logger

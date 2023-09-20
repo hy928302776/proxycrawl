@@ -1,6 +1,7 @@
 import sys
 
 from service.MacroCls import cls_macro_data
+from config.Logger import logger
 
 datalist = [
     {"industryCode": "1103", "industryName": "A股盘面直播"},
@@ -21,12 +22,12 @@ if __name__ == "__main__":
     result_map = {}
 
     for data in datalist:
-        print(f"开始获取{data['industryCode']}的数据，bMilvus：{bMilvus},beginTime:{beginTime},endTime:{endTime}")
-        print(f"一共{len(datalist)}组数据")
+        logger.info(f"开始获取{data['industryCode']}的数据，bMilvus：{bMilvus},beginTime:{beginTime},endTime:{endTime}")
+        logger.info(f"一共{len(datalist)}组数据")
         total, valid_data_total = cls_macro_data(bMilvus, data['industryCode'], data['industryName'], beginTime,
                                                  endTime)
         result_totle += total
         result_valid_data_total += valid_data_total
         result_map[data['industryCode']] = f"一共处理了{total}条，有效{valid_data_total}条"
 
-    print(f"本次脚本一共处理了{result_totle}条，有效{result_valid_data_total}条，其中：{result_map}")
+    logger.info(f"本次脚本一共处理了{result_totle}条，有效{result_valid_data_total}条，其中：{result_map}")

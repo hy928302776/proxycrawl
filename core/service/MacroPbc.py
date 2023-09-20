@@ -17,7 +17,7 @@ from config.common_config import crowBaseUrl
 from storage import MilvusStore
 from storage import MongoDbStore
 from utils.urlToData import get_text
-
+from config.Logger import logger
 
 def pbcMacro(beginTime: str, endTime: str, bStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
 
@@ -32,10 +32,10 @@ def pbcMacro(beginTime: str, endTime: str, bStore: bool = True):  # 两个参数
         "%Y-%m-%d") if not beginTime else beginTime
     endTime = (datetime.date.today()).strftime("%Y-%m-%d") if not endTime else endTime
     while count < 5:
-        print(f"开始获取第{pageIndex}页数据")
+        logger.info(f"开始获取第{pageIndex}页数据")
         link = f"http://www.pbc.gov.cn/goutongjiaoliu/113456/113469/11040/index{pageIndex}.html"
 
-        print(f"link:{link}")  # 用于检查
+        logger.info(f"link:{link}")  # 用于检查
         crawUrl = f"{crowBaseUrl}&url={urllib.parse.quote(link)}"
         try:
             soup = BeautifulSoup(download_page(link),"html.parser")
@@ -48,14 +48,14 @@ def pbcMacro(beginTime: str, endTime: str, bStore: bool = True):  # 两个参数
         # 读取的是json文件。因此就用json打开啦
         data = []
 
-        print(f"获取第{pageIndex}页的数据，大小为{len(data)}")
+        logger.info(f"获取第{pageIndex}页的数据，大小为{len(data)}")
         if len(data) == 0:
             break
         storageList: list = []
         for i in range(0, len(data)):
-            print("\n---------------------")
+            logger.info("\n---------------------")
             total += 1
-            print(f"开始处理第{total}条数据：{data[i]}")
+            logger.info(f"开始处理第{total}条数据：{data[i]}")
             url = f"https://data.eastmoney.com/report/info/{data[i]['infoCode']}.html"
 
             text, err = get_text(url)
@@ -82,8 +82,8 @@ def pbcMacro(beginTime: str, endTime: str, bStore: bool = True):  # 两个参数
                 errdata.update(metadata)
                 errorList.append(errdata)
 
-            print(f"第{total}条数据处理完成,数据内容：{json.dumps(metadata, ensure_ascii=False)}")
-            print("\n")
+            logger.info(f"第{total}条数据处理完成,数据内容：{json.dumps(metadata, ensure_ascii=False)}")
+            logger.info("\n")
 
         if bStore and len(storageList) > 0:
             # 存入矢量库
@@ -91,13 +91,13 @@ def pbcMacro(beginTime: str, endTime: str, bStore: bool = True):  # 两个参数
             try:
                 MilvusStore.storeData(storageList, "aifin_macro")
             except:
-                print(f"第{pageIndex}页的数据，大小为{len(data)} 存入矢量库异常")
+                logger.info(f"第{pageIndex}页的数据，大小为{len(data)} 存入矢量库异常")
                 status = -1
             # 存入mongoDB库
             MongoDbStore.storeData(storageList, f"aifin_macro", status)
 
-        print(f"第{pageIndex}页数据处理完成")
-        print("\n")
+        logger.info(f"第{pageIndex}页数据处理完成")
+        logger.info("\n")
         pageIndex += 1
         count = 0
 
@@ -112,7 +112,7 @@ def pbcMacro(beginTime: str, endTime: str, bStore: bool = True):  # 两个参数
                     "createTime": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                     "content": content}]
         MongoDbStore.storeData(logdata, f"aifin_logs", 0)
-        print(content)
+        logger.info(content)
 
 
 if __name__ == "__main__":
