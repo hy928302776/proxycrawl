@@ -100,8 +100,13 @@ def eastmoney_news(bMilvus: bool, code: str, stockName: str,num:int, beginTime: 
                 logger.info(f"比结束时间还大，终止并继续下个循环")
                 continue
 
+
             url = data[i]['url']
             text, err = get_text(url, beStore)
+            if err is not None:
+                url = f"http://finance.eastmoney.com/a/{data[i]['code']}.html"
+                text, err = get_text(url, beStore)
+
             abstract = data[i]['content'].replace('</em>', '').replace('<em>', '').strip()
             if not abstract or len(abstract) == 0:
                 if text and len(text) > 0:

@@ -92,3 +92,5 @@ if __name__ == '__main__':
                  "text": 'text'}]
     #MongoDbStore("aifin_stock").storeData(metadata, 0).close()
     logger.info(MongoDbStore("aifin_stock").countData({"status": {"$lt": 2}}))
+    "601058"
+    MongoDbStore("aifin_stock_error").collection.delete_many({"_id":{'$in':[]}})

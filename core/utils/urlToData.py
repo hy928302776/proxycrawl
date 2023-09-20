@@ -253,10 +253,12 @@ def requestUtil(link, **kwargs):
 
 
 if __name__ == '__main__':
-    test = download_page(
-        "http://futures.eastmoney.com/a/202309192852050569.html",
-        False)
-    # test, err = get_text("https://www.cls.cn/detail/1459408", False, headers={'user-agent': 'Mozilla/5.0'})
-    soup = BeautifulSoup(test)
-    text = soup.find_all("div", {"class": "txtinfos"})[0].get_text()
-    logger.info(text)
+    # test = download_page(
+    #     "http://data.eastmoney.com/notices/detail/600679/AN202308251595861155.html",
+    #     False)
+    # soup = BeautifulSoup(test)
+    # text = soup.find_all("div", {"class": "txtinfos"})[0].get_text()
+    # logger.info(text)
+
+    test, err = get_text("http://finance.eastmoney.com/a/202309092842368482.html", False, headers={'user-agent': 'Mozilla/5.0'})
+    print(test)
