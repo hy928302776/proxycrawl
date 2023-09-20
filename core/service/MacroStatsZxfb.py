@@ -1,13 +1,15 @@
 import sys
 import uuid
 
+
+
 # ============  国家统计局-最新发布===========
 sys.path.append("..")
 import datetime
 import json
 from bs4 import BeautifulSoup
 from utils.urlToData import download_page, get_text
-from storage import MilvusStore
+from storage.MilvusStore import storeMilvusTool
 from storage.MongoDbStore import MongoDbStore
 from config.Logger import logger
 
@@ -105,17 +107,10 @@ def stats_zxfb(bMilvus: bool, beginTime: str, endTime: str, bStore: bool = True)
             logger.info("\n")
 
         if bStore and len(storageList) > 0:
-            status = -1
-            if bMilvus:
-                # 存入矢量库
-                status = 0
-                try:
-                    MilvusStore.storeData(storageList, "aifin_macro")
-                except Exception as e:
-                    logger.info(f"第{pageIndex}页的数据，大小为{len(list_data)} 存入矢量库异常:{e}")
-                    status = -1
+            # 存入矢量库
+            result_total_list = storeMilvusTool(bMilvus, storageList, "aifin_macro")
             # 存入mongoDB库
-            MongoDbStore("aifin_macro").storeData(storageList, status).close()
+            MongoDbStore("aifin_macro").storeData(result_total_list).close()
 
         logger.info(f"第{pageIndex}页数据处理完成")
         logger.info("\n")

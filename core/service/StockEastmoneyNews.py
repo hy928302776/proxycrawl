@@ -9,10 +9,12 @@ import urllib.parse
 
 import requests
 
+
+
 sys.path.append("..")
 from utils.urlToData import download_page
 from utils.urlToData import get_text
-from storage import MilvusStore
+from storage.MilvusStore import storeMilvusTool
 from storage.MongoDbStore import MongoDbStore
 from config.Logger import logger
 
@@ -138,17 +140,10 @@ def eastmoney_news(bMilvus: bool, code: str, stockName: str,num:int, beginTime: 
             logger.info("\n")
 
         if beStore and len(storageList) > 0:
-            status = -1
-            if bMilvus:
-                # 存入矢量库
-                status = 0
-                try:
-                    MilvusStore.storeData(storageList, f"aifin_stock_{code}")
-                except Exception as e:
-                    logger.info(f"第{pageIndex}页的数据，大小为{len(data)} 存入矢量库异常,{e}")
-                    status = -1
+            # 存入矢量库
+            result_total_list = storeMilvusTool(bMilvus, storageList, f"aifin_stock_{code}")
             # 存入mongoDB库
-            MongoDbStore("aifin_stock").storeData(storageList, status).close()
+            MongoDbStore("aifin_stock").storeData(result_total_list).close()
 
         logger.info(f"第{pageIndex}页数据处理完成")
         logger.info("\n")

@@ -1,14 +1,16 @@
-# ===================个股通联研报==============================
+# ===================行业通联研报==============================
 import datetime
 import sys
 
 sys.path.append("..")
-from storage import MilvusStore
+from storage.MilvusStore import storeMilvusTool
 from storage.MongoDbStore import MongoDbStore
 from storage.MySqlStore import TlDb
 from config.Logger import logger
 
-def industry_tl_report(bMilvus: bool, industry_code: str,industry_name:str,num:int, beginDateStr: str, endDateStr: str, bStore: bool = True):
+
+def industry_tl_report(bMilvus: bool, industry_code: str, industry_name: str, num: int, beginDateStr: str,
+                       endDateStr: str, bStore: bool = True):
     beginDateStr = (datetime.date.today() - datetime.timedelta(days=1)).strftime(
         "%Y-%m-%d") if not beginDateStr else beginDateStr
     endDateStr = (datetime.date.today()).strftime(
@@ -21,12 +23,12 @@ def industry_tl_report(bMilvus: bool, industry_code: str,industry_name:str,num:i
     count_result = tldb.select(count_sql)
     result_count = count_result[0]['count']
     logger.info(f"第{num}个行业符合条件的数据有{result_count}条")
-    if result_count==0:
+    if result_count == 0:
         return 0
     # （2）
     total = 0
     startIndex = 0
-    offset = 10
+    offset = 1000
     while True:
         currenttime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         # （1）根据REPORT_TYPE+SEC_CODE获取
@@ -48,16 +50,11 @@ def industry_tl_report(bMilvus: bool, industry_code: str,industry_name:str,num:i
         # （2）入库处理
         logger.info(f"本次【{industry_code}】获取到{len(query_result)}条数据")
         if bStore:
-            status = -1
-            if bMilvus:
-                status = 0
-                try:
-                    MilvusStore.storeData(query_result, f"aifin_industry_{industry_code}")
-                except Exception as e:
-                    logger.info(f"{industry_code}的数据，大小为{len(query_result)} 存入矢量库异常,{e}")
-                    status = -1
+            # 存入矢量库
+            result_total_list = storeMilvusTool(bMilvus, query_result, f"aifin_industry_{industry_code}")
             # 存入mongoDB库
-            MongoDbStore("aifin_industry").storeData(query_result, status).close()
+            MongoDbStore("aifin_industry").storeData(result_total_list).close()
+
             logger.info("本次入库完成")
 
         total += len(query_result)
@@ -70,6 +67,7 @@ def industry_tl_report(bMilvus: bool, industry_code: str,industry_name:str,num:i
 
     return total
 
+
 # （2）
 
 
@@ -80,4 +78,4 @@ if __name__ == '__main__':
     bMilvus: bool = False
     industry_code = '01032116'
     industry_name = '轻工制造'
-    industry_tl_report(bMilvus, industry_code,industry_name,1, beginTime, endTime, bStore)
+    industry_tl_report(bMilvus, industry_code, industry_name, 1, beginTime, endTime, bStore)

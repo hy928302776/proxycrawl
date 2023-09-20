@@ -3,8 +3,10 @@ import sys
 
 import pymongo
 from pymongo.errors import BulkWriteError
+
 sys.path.append("..")
 from config.Logger import logger
+
 
 class MongoDbStore:
     conn = None
@@ -17,21 +19,20 @@ class MongoDbStore:
         database = self.conn['milvus_data']
         self.collection = database[self.collection_name]
 
-    def storeData(self, docList: list, status: int = 0):
+    def storeData(self, docList: list):
         """
         :param docList:
         :param collection_name:
         :param status:
         :return:
         """
+        logger.info(f"开始写入mongodb")
+        if docList and len(docList) > 0:
+            try:
+                self.collection.insert_many(docList, ordered=False)
+            except BulkWriteError as e:
 
-        for doc in docList:
-            doc.update({'status': status})
-        try:
-            self.collection.insert_many(docList,ordered=False)
-        except BulkWriteError as e:
-
-            pass  # 忽略重复的错误
+                pass  # 忽略重复的错误
         logger.info(f"写入mongodb【{self.collection_name}】库over")
         return self
 
@@ -61,15 +62,15 @@ class MongoDbStore:
             total_count = nextObj['total']
         return total_count
 
-    def listgroupCount(self,filter_condition:dict, category: str):
+    def listgroupCount(self, filter_condition: dict, category: str):
         result = self.collection.aggregate([
             {"$match": filter_condition},
             {"$group": {"_id": f"${category}", "count": {"$sum": 1}}}
         ])
         return result
 
-    def deleteBystatus(self,status):
-        result = self.collection.delete_many({"status":status})
+    def deleteBystatus(self, status):
+        result = self.collection.delete_many({"status": status})
         return result.deleted_count
 
     def close(self):
@@ -90,7 +91,7 @@ if __name__ == '__main__':
                  "title": '你好',
                  "mediaName": '中国',
                  "text": 'text'}]
-    #MongoDbStore("aifin_stock").storeData(metadata, 0).close()
+    # MongoDbStore("aifin_stock").storeData(metadata, 0).close()
     logger.info(MongoDbStore("aifin_stock").countData({"status": {"$lt": 2}}))
     "601058"
-    MongoDbStore("aifin_stock_error").collection.delete_many({"_id":{'$in':[]}})
+    MongoDbStore("aifin_stock_error").collection.delete_many({"_id": {'$in': []}})

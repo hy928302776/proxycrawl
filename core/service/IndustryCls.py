@@ -7,8 +7,10 @@ import urllib.parse
 import time
 import requests
 
+
+
 sys.path.append("..")
-from storage import MilvusStore
+from storage.MilvusStore import storeMilvusTool
 from storage.MongoDbStore import MongoDbStore
 from utils.urlToData import download_page
 from utils.urlToData import get_text
@@ -120,16 +122,9 @@ def cls_industry_data(bMilvus: bool, industryCode: str, industryName: str,num:in
 
         if bStore and len(storageList) > 0:
             # 存入矢量库
-            status = -1
-            if bMilvus:
-                status = 0
-                try:
-                    MilvusStore.storeData(storageList, f"aifin_industry_{industryCode}")
-                except Exception as e:
-                    logger.info(f"{endTime_str}以来的{len(data)}条数据， 存入矢量库异常:{e}")
-                    status = -1
+            result_total_list = storeMilvusTool(bMilvus, storageList, f"aifin_industry_{industryCode}")
             # 存入mongoDB库
-            MongoDbStore("aifin_industry").storeData(storageList, status).close()
+            MongoDbStore("aifin_industry").storeData(result_total_list).close()
 
         logger.info(f"第{num}个行业{industryCode}获取{endTime_str}以来的{len(data)}条数据处理完成")
         logger.info("\n")

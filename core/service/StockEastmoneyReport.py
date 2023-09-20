@@ -8,14 +8,16 @@ import urllib.parse
 
 import requests
 
+
+
 sys.path.append("..")
 from config.common_config import crowBaseUrl
-from storage import MilvusStore
+from storage.MilvusStore import storeMilvusTool
 from storage.MongoDbStore import MongoDbStore
 from utils.urlToData import get_text
 from config.Logger import logger
 
-def eastmoney(code: str, stockName: str, beginTime: str, endTime: str, bStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
+def eastmoney(bMilvus:bool,code: str, stockName: str, beginTime: str, endTime: str, bStore: bool = True):  # 两个参数分别表示开始读取与结束读取的页码
     type = "eastmoney-stock-report"
     # 遍历每一个URL
     total = 0
@@ -90,14 +92,9 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str, bStore: b
 
         if bStore and len(storageList) > 0:
             # 存入矢量库
-            status = 0
-            try:
-                MilvusStore.storeData(storageList, f"aifin_stock_{code}")
-            except:
-                logger.info(f"第{pageIndex}页的数据，大小为{len(data)} 存入矢量库异常")
-                status = 2
+            result_total_list = storeMilvusTool(bMilvus, storageList, f"aifin_stock_{code}")
             # 存入mongoDB库
-            MongoDbStore("aifin_stock").storeData(storageList, status).close()
+            MongoDbStore("aifin_stock").storeData(result_total_list).close()
 
         logger.info(f"第{pageIndex}页数据处理完成")
         logger.info("\n")
@@ -121,4 +118,4 @@ def eastmoney(code: str, stockName: str, beginTime: str, endTime: str, bStore: b
 
 if __name__ == "__main__":
 
-    eastmoney("300375", "宁德时代", None, None,False)
+    eastmoney(False,"300375", "宁德时代", None, None,False)

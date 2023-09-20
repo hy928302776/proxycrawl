@@ -2,8 +2,10 @@
 import datetime
 import sys
 
+
+
 sys.path.append("..")
-from storage import MilvusStore
+from storage.MilvusStore import storeMilvusTool
 from storage.MongoDbStore import MongoDbStore
 from storage.MySqlStore import TlDb
 from config.Logger import logger
@@ -44,17 +46,10 @@ def stock_tl_survey(bMilvus:bool,sec_code, beginDateStr: str, endDateStr: str,bS
         # （2）入库处理
         logger.info(f"本次【{sec_code}】获取到{len(query_result)}条数据")
         if bStore:
-            status=-1
-            if bMilvus:
-                status = 0
-                try:
-                    MilvusStore.storeData(query_result, f"aifin_stock_{sec_code}")
-                except Exception as e:
-                    logger.info(f"{sec_code}的数据，大小为{len(query_result)} 存入矢量库异常,{e}")
-                    status = -1
+            # 存入矢量库
+            result_total_list = storeMilvusTool(bMilvus, query_result, f"aifin_stock_{sec_code}")
             # 存入mongoDB库
-            MongoDbStore("aifin_stock").storeData(query_result, status).close()
-            logger.info("本次入库完成")
+            MongoDbStore("aifin_stock").storeData(result_total_list).close()
 
         total += len(query_result)
         # （3）后续处理
