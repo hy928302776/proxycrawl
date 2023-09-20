@@ -114,7 +114,8 @@ def cls_industry_data(bMilvus: bool, industryCode: str, industryName: str,num:in
             endTimeStamp = s_datetime
             valid_data_total += 1  # 统计有效数据
 
-            logger.info(f"第{num}个行业{industryCode}第{total}条数据处理完成,数据内容：{json.dumps(metadata, ensure_ascii=False)}")
+            new_dict = {key: metadata[key] if key != 'text' else metadata[key][0:1000] for key in metadata.keys()}
+            logger.info(f"第{num}个行业{industryCode}第{total}条数据处理完成,数据内容：{json.dumps(new_dict, ensure_ascii=False)}")
             logger.info("\n")
 
         if bStore and len(storageList) > 0:

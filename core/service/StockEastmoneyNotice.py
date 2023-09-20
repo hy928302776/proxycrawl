@@ -146,7 +146,9 @@ def east_notice(bMilvus:bool,code: str, stockName: str,num:int, beginTime: str, 
                 errdata.update(metadata)
                 errorList.append(errdata)
             valid_data_total+=1
-            logger.info(f"第{total}条数据处理完成,数据内容：{json.dumps(metadata, ensure_ascii=False)}")
+
+            new_dict = {key: metadata[key] if key != 'text' else metadata[key][0:1000] for key in metadata.keys()}
+            logger.info(f"第{total}条数据处理完成,数据内容：{json.dumps(new_dict, ensure_ascii=False)}")
             logger.info("\n")
 
         if beStore and len(storageList) > 0:
