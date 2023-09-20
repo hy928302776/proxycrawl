@@ -117,6 +117,17 @@ analysis_method = [
      "replace": ["\n\n", "  "],
      "temp": "https://www.cls.cn/detail/1459566"
      },
+	{"domain": "http://global.eastmoney.com/a/",
+     "value": [
+         {
+             "element": "div",
+             "attr": {"class": "txtinfos"},
+         }
+     ],
+     "replace": ["\n\n", "  "],
+     "extract": ["table"],
+     "temp": "http://global.eastmoney.com/a/202309202852102465.html"
+     },
 ]
 
 
@@ -166,6 +177,7 @@ def get_text(url, useproxy: bool = True, **kwargs):
             return text, errlog
 
     except Exception as e:
+        text=""
         logger.info(f"解析网页内容异常:{e}")
         return text, f"解析网页内容异常:{e}"
 
@@ -231,7 +243,9 @@ def requestUtil(link, **kwargs):
 
 if __name__ == '__main__':
     test = download_page(
-        "https://np-cnotice-stock.eastmoney.com/api/content/ann?art_code=AN202309071597979547&client_source=web&page_index=1&_=1694897075027",
+        "http://global.eastmoney.com/a/202309202852102465.html",
         False)
     # test, err = get_text("https://www.cls.cn/detail/1459408", False, headers={'user-agent': 'Mozilla/5.0'})
-    logger.info(test)
+    soup = BeautifulSoup(test)
+    text = soup.find_all("div", {"class": "txtinfos"})[0].get_text()
+    logger.info(text)

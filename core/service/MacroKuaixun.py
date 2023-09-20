@@ -100,6 +100,7 @@ def kuaixun_macro(bMilvus: bool, beginTime: str, endTime: str, bStore: bool = Tr
             if text:
                 storageList.append(metadata)
             else:
+
                 errdata = {"err": err}
                 errdata.update(metadata)
                 errorList.append(errdata)
