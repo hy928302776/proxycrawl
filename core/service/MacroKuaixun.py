@@ -85,7 +85,8 @@ def kuaixun_macro(bMilvus: bool, beginTime: str, endTime: str, bStore: bool = Tr
             if not abstract:
                 if text and len(text) > 0:
                     abstract = text[0:100]
-
+            if text is None:
+                text = ""
             # 数据处理
             metadata = {"source": "Web",
                         "uniqueId": str(newsid),
